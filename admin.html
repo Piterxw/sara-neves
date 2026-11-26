@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -38,9 +39,14 @@ button:disabled{opacity:.5}
 .servico .ativo{display:flex;align-items:center;gap:8px;margin:8px 0}
 .servico .ativo input{width:auto;margin:0}
 .preco-texto{color:#80634f;font-size:13px}
+.tabela-historico{width:100%;border-collapse:collapse;text-align:left}
+.tabela-historico th,.tabela-historico td{padding:12px 6px;border-bottom:1px solid #eee}
+.tabela-historico th{font-size:12px;color:#80634f}
 @media(max-width:480px){
   .servico .linha{display:block}
   .servico .linha .preco{max-width:none}
+  .card{padding:16px}
+  .tabela-historico th,.tabela-historico td{font-size:12px;padding:10px 4px}
 }
 </style>
 </head>
@@ -63,8 +69,10 @@ button:disabled{opacity:.5}
 </section>
 
 <section id="painel" class="hidden">
+
 <div class="tabs">
 <button id="abaAgendamentos">Agendamentos</button>
+<button id="abaHistorico" class="secondary">Histórico</button>
 <button id="abaGaleria" class="secondary">Galeria de fotos</button>
 <button id="abaServicos" class="secondary">Preços e Serviços</button>
 </div>
@@ -74,13 +82,18 @@ button:disabled{opacity:.5}
 <section id="areaAgendamentos" class="card">
 <h2>Agendamentos</h2>
 <select id="filtro">
-<option value="todos">Todos os agendamentos</option>
+<option value="todos">Todos os agendamentos ativos</option>
 <option value="pending">Pendentes</option>
 <option value="awaiting_payment">Aguardando pagamento</option>
 <option value="confirmed">Confirmados</option>
-<option value="cancelled">Cancelados</option>
 </select>
 <div id="listaAgendamentos">Carregando...</div>
+</section>
+
+<section id="areaHistorico" class="card hidden">
+<h2>Histórico</h2>
+<p>Agendamentos cancelados.</p>
+<div id="listaHistorico">Carregando histórico...</div>
 </section>
 
 <section id="areaGaleria" class="card hidden">
@@ -208,15 +221,18 @@ document.getElementById("sair").addEventListener("click", async () => {
   mostrarLogin();
 });
 
+/* ABAS */
 function mostrarAba(aba) {
   const areas = {
     agendamentos: "areaAgendamentos",
+    historico: "areaHistorico",
     galeria: "areaGaleria",
     servicos: "areaServicos"
   };
 
   const botoes = {
     agendamentos: "abaAgendamentos",
+    historico: "abaHistorico",
     galeria: "abaGaleria",
     servicos: "abaServicos"
   };
@@ -227,11 +243,13 @@ function mostrarAba(aba) {
   });
 
   if (aba === "agendamentos") carregarAgendamentos();
+  if (aba === "historico") carregarHistorico();
   if (aba === "galeria") carregarFotos();
   if (aba === "servicos") carregarServicos();
 }
 
 document.getElementById("abaAgendamentos").addEventListener("click", () => mostrarAba("agendamentos"));
+document.getElementById("abaHistorico").addEventListener("click", () => mostrarAba("historico"));
 document.getElementById("abaGaleria").addEventListener("click", () => mostrarAba("galeria"));
 document.getElementById("abaServicos").addEventListener("click", () => mostrarAba("servicos"));
 
@@ -241,6 +259,7 @@ function formatarData(data) {
   return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
 
+/* AGENDAMENTOS ATIVOS */
 async function carregarAgendamentos() {
   const lista = document.getElementById("listaAgendamentos");
   lista.textContent = "Carregando agendamentos...";
@@ -248,11 +267,13 @@ async function carregarAgendamentos() {
   const { data, error } = await db
     .from("appointments")
     .select("*")
+    .neq("status", "cancelled")
     .order("appointment_date", { ascending: true })
     .order("appointment_time", { ascending: true });
 
   if (error) {
     lista.textContent = "Erro ao carregar agendamentos.";
+    console.error(error);
     return;
   }
 
@@ -288,7 +309,7 @@ async function carregarAgendamentos() {
 
     div.append(titulo, detalhes, telefone, status);
 
-    if (item.status !== "confirmed" && item.status !== "cancelled") {
+    if (item.status !== "confirmed") {
       const confirmar = document.createElement("button");
       confirmar.textContent = "Confirmar";
       confirmar.addEventListener("click", () =>
@@ -298,9 +319,11 @@ async function carregarAgendamentos() {
       const cancelar = document.createElement("button");
       cancelar.textContent = "Cancelar";
       cancelar.className = "danger";
-      cancelar.addEventListener("click", () =>
-        alterarStatus(item.id, "cancelled")
-      );
+      cancelar.addEventListener("click", () => {
+        if (confirm("Deseja cancelar este agendamento?")) {
+          alterarStatus(item.id, "cancelled");
+        }
+      });
 
       div.append(confirmar, cancelar);
     }
@@ -309,6 +332,64 @@ async function carregarAgendamentos() {
   });
 }
 
+/* HISTÓRICO DE CANCELAMENTOS */
+async function carregarHistorico() {
+  const lista = document.getElementById("listaHistorico");
+  lista.textContent = "Carregando histórico...";
+
+  const { data, error } = await db
+    .from("appointments")
+    .select("id,customer_name,appointment_date,appointment_time")
+    .eq("status", "cancelled")
+    .order("appointment_date", { ascending: false })
+    .order("appointment_time", { ascending: true });
+
+  if (error) {
+    lista.textContent = "Erro ao carregar histórico.";
+    console.error(error);
+    return;
+  }
+
+  lista.replaceChildren();
+
+  if (!data || data.length === 0) {
+    lista.textContent = "Nenhum cancelamento registrado.";
+    return;
+  }
+
+  const tabela = document.createElement("table");
+  tabela.className = "tabela-historico";
+
+  const cabecalho = document.createElement("tr");
+
+  ["NOME", "DIA", "HORÁRIO"].forEach(texto => {
+    const th = document.createElement("th");
+    th.textContent = texto;
+    cabecalho.appendChild(th);
+  });
+
+  tabela.appendChild(cabecalho);
+
+  data.forEach(item => {
+    const linha = document.createElement("tr");
+
+    [
+      item.customer_name || "Cliente",
+      formatarData(item.appointment_date),
+      item.appointment_time || ""
+    ].forEach(texto => {
+      const td = document.createElement("td");
+      td.textContent = texto;
+      linha.appendChild(td);
+    });
+
+    tabela.appendChild(linha);
+  });
+
+  lista.appendChild(tabela);
+}
+
+/* ALTERAR STATUS */
 async function alterarStatus(id, status) {
   avisar("Atualizando agendamento...");
 
@@ -319,15 +400,21 @@ async function alterarStatus(id, status) {
 
   if (error) {
     avisar("Não foi possível atualizar o agendamento.");
+    console.error(error);
     return;
   }
 
-  avisar("Agendamento atualizado!");
+  avisar(status === "cancelled"
+    ? "Agendamento cancelado e enviado ao histórico!"
+    : "Agendamento atualizado!");
+
   carregarAgendamentos();
 }
 
+/* FILTRO */
 document.getElementById("filtro").addEventListener("change", carregarAgendamentos);
 
+/* GALERIA */
 document.getElementById("formFoto").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -480,7 +567,6 @@ async function excluirFoto(foto) {
 }
 
 /* PREÇOS E SERVIÇOS */
-
 async function carregarServicos() {
   const lista = document.getElementById("listaServicos");
   lista.textContent = "Carregando serviços...";
@@ -619,23 +705,15 @@ document.getElementById("formServico").addEventListener("submit", async (e) => {
     avisar(error.code === "23505"
       ? "Já existe um serviço com esse nome."
       : "Erro ao adicionar: " + error.message);
+   
     return;
   }
 
+  avisar("Serviço adicionado com sucesso!");
   document.getElementById("formServico").reset();
-  avisar("Novo serviço adicionado!");
   carregarServicos();
 });
 
-async function iniciar() {
-  if (await verificarAdmin()) {
-    carregarAgendamentos();
-    carregarFotos();
-    carregarServicos();
-  }
-}
-
-iniciar();
 </script>
 </body>
-  </html>
+</html>
