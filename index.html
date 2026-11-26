@@ -344,43 +344,44 @@ async function carregarGaleria() {
   const galeria = document.getElementById("galeriaFotos");
   galeria.replaceChildren();
 
-  const { data, error } = await db
-    .from("gallery_photos")
-    .select("id,image_url,caption,created_at")
-    .order("created_at", { ascending: false });
+  try {
+    const { data, error } = await db
+      .from("gallery_photos")
+      .select("id,image_url,caption,created_at")
+      .order("created_at", { ascending: false });
 
-  if (error) {
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      const aviso = document.createElement("p");
+      aviso.className = "gallery-empty";
+      aviso.textContent = "Em breve, novidades por aqui. Estamos preparando nossa galeria!";
+      galeria.appendChild(aviso);
+      return;
+    }
+
+    data.forEach(foto => {
+      const card = document.createElement("article");
+      card.className = "gallery-card";
+
+      const imagem = document.createElement("img");
+      imagem.src = foto.image_url;
+      imagem.alt = foto.caption || "Trabalho Sara Neves Brow Studio";
+      imagem.loading = "lazy";
+
+      const legenda = document.createElement("p");
+      legenda.textContent = foto.caption || "Sara Neves Brow Studio";
+
+      card.append(imagem, legenda);
+      galeria.appendChild(card);
+    });
+  } catch (error) {
     const aviso = document.createElement("p");
     aviso.className = "gallery-empty";
     aviso.textContent = "Não foi possível carregar as fotos no momento.";
     galeria.appendChild(aviso);
     console.error("Erro na galeria:", error);
-    return;
   }
-
-  if (!data || data.length === 0) {
-    const aviso = document.createElement("p");
-    aviso.className = "gallery-empty";
-    aviso.textContent = "Em breve, novidades por aqui. Estamos preparando nossa galeria!";
-    galeria.appendChild(aviso);
-    return;
-  }
-
-  data.forEach(foto => {
-    const card = document.createElement("article");
-    card.className = "gallery-card";
-
-    const imagem = document.createElement("img");
-    imagem.src = foto.image_url;
-    imagem.alt = foto.caption || "Trabalho Sara Neves Brow Studio";
-    imagem.loading = "lazy";
-
-    const legenda = document.createElement("p");
-    legenda.textContent = foto.caption || "Sara Neves Brow Studio";
-
-    card.append(imagem, legenda);
-    galeria.appendChild(card);
-  });
 }
 
 /* HORÁRIOS */
@@ -430,9 +431,11 @@ function gerarHorarios() {
 
 async function carregarHorarios() {
   const data = campoData.value;
+
   campoHorario.innerHTML = '<option value="">Carregando horários...</option>';
   campoHorario.disabled = true;
   horariosDisponiveis = [];
+  campoHorario.value = "";
 
   if (!data) {
     campoHorario.innerHTML = '<option value="">Primeiro escolha a data</option>';
@@ -451,6 +454,7 @@ async function carregarHorarios() {
       "horarios_ocupados",
       { p_data: data }
     );
+
     if (error) throw error;
 
     const agora = new Date();
@@ -488,19 +492,165 @@ async function carregarHorarios() {
     });
 
     campoHorario.disabled = false;
+
   } catch (error) {
-    console.error(error);
+    console.error("Erro ao carregar horários:", error);
     campoHorario.innerHTML = '<option value="">Erro ao carregar horários</option>';
     mensagem.textContent = "Não foi possível consultar os horários. Atualize a página e tente novamente.";
   }
 }
 
+/* Atualiza os horários quando a data é escolhida */
 campoData.addEventListener("change", carregarHorarios);
+campoData.addEventListener("input", carregarHorarios);
 
 /* AGENDAMENTO */
 form.addEventListener("submit", async event => {
   event.preventDefault();
   pixBox.style.display = "none";
+  mensagem.textContent = "";
 
   const nome = document.getElementById("nome").value.trim();
-  const telefone = d
+  const telefone = document.getElementById("telefone").value.trim();
+  const data = campoData.value;
+  const horario = campoHorario.value;
+  const servicoId = document.getElementById("servico").value;
+
+  const servicoSelecionado = servicosAtivos.find(item => item.id === servicoId);
+
+  if (!nome || !telefone || !data || !horario || !servicoSelecionado) {
+    mensagem.textContent = "Preencha todos os campos e escolha um horário disponível.";
+    return;
+  }
+
+  if (data < dataLocal()) {
+    mensagem.textContent = "Escolha uma data válida.";
+    return;
+  }
+
+  const servico = servicoSelecionado.name;
+  const precoServico = Number(servicoSelecionado.price);
+
+  if (!Number.isFinite(precoServico) || precoServico <= 0) {
+    mensagem.textContent = "O preço deste serviço não está configurado corretamente. Entre em contato pelo WhatsApp.";
+    return;
+  }
+
+  botao.disabled = true;
+  botao.textContent = "ENVIANDO SOLICITAÇÃO...";
+
+  try {
+    const { data: ocupados, error: erroConsulta } = await db.rpc(
+      "horarios_ocupados",
+      { p_data: data }
+    );
+
+    if (erroConsulta) throw erroConsulta;
+
+    const inicioEscolhido = minutosDoHorario(horario);
+    const fimEscolhido = inicioEscolhido + DURACAO;
+
+    const conflito = (ocupados || []).some(item => {
+      const inicioOcupado = minutosDoHorario(item.horario);
+      const fimOcupado = inicioOcupado + Number(item.duracao || DURACAO);
+      return inicioEscolhido < fimOcupado && fimEscolhido > inicioOcupado;
+    });
+
+    if (conflito) {
+      mensagem.textContent = "Esse horário acabou de ser ocupado. Escolha outro horário.";
+      await carregarHorarios();
+      return;
+    }
+
+    const { error } = await db
+      .from("appointments")
+      .insert([{
+        customer_name: nome,
+        customer_phone: telefone,
+        service: servico,
+        service_price: precoServico,
+        appointment_date: data,
+        appointment_time: horario,
+        status: "pending"
+      }]);
+
+    if (error) throw error;
+
+    const dataFormatada = data.split("-").reverse().join("/");
+
+    const textoWhatsApp =
+      `Olá, Sara! Gostaria de solicitar um agendamento.\n\n` +
+      `Nome: ${nome}\n` +
+      `WhatsApp: ${telefone}\n` +
+      `Serviço: ${servico}\n` +
+      `Valor: ${formatarMoeda(precoServico)}\n` +
+      `Data: ${dataFormatada}\n` +
+      `Horário: ${horario}\n\n` +
+      `Aguardo a confirmação do horário.`;
+
+    const linkWhatsApp =
+      `https://wa.me/${WHATSAPP_SARA}?text=${encodeURIComponent(textoWhatsApp)}`;
+
+    document.getElementById("pixValor").textContent = formatarMoeda(precoServico);
+
+    const textoComprovante =
+      `Olá, Sara! Estou enviando o comprovante do Pix referente ao agendamento.\n\n` +
+      `Nome: ${nome}\n` +
+      `Serviço: ${servico}\n` +
+      `Valor: ${formatarMoeda(precoServico)}\n` +
+      `Data: ${dataFormatada}\n` +
+      `Horário: ${horario}\n\n` +
+      `Segue o comprovante.`;
+
+    document.getElementById("enviarComprovante").href =
+      `https://wa.me/${WHATSAPP_SARA}?text=${encodeURIComponent(textoComprovante)}`;
+
+    mensagem.textContent = "Solicitação registrada! Agora você pode copiar a chave Pix e enviar os dados pelo WhatsApp.";
+    mensagem.style.color = "#594437";
+
+    pixBox.style.display = "block";
+    tocarSom("confirmacao");
+
+    window.open(linkWhatsApp, "_blank");
+
+    document.getElementById("nome").value = "";
+    document.getElementById("telefone").value = "";
+    document.getElementById("servico").value = "";
+    document.getElementById("precoSelecionado").textContent = "Selecione um serviço para ver o preço.";
+    campoData.value = "";
+    campoHorario.innerHTML = '<option value="">Primeiro escolha a data</option>';
+    campoHorario.disabled = true;
+    horariosDisponiveis = [];
+
+  } catch (error) {
+    console.error("Erro ao registrar agendamento:", error);
+    mensagem.textContent = "Não foi possível registrar o agendamento. Tente novamente ou entre em contato pelo WhatsApp.";
+    mensagem.style.color = "#a33";
+  } finally {
+    botao.disabled = false;
+    botao.textContent = "SOLICITAR AGENDAMENTO";
+  }
+});
+
+/* COPIAR CHAVE PIX */
+document.getElementById("copiarPix").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(CHAVE_PIX);
+    document.getElementById("copiarPix").textContent = "CHAVE PIX COPIADA!";
+  } catch (error) {
+    const campoTemporario = document.createElement("textarea");
+    campoTemporario.value = CHAVE_PIX;
+    document.body.appendChild(campoTemporario);
+    campoTemporario.select();
+    document.execCommand("copy");
+    campoTemporario.remove();
+    document.getElementById("copiarPix").textContent = "CHAVE PIX COPIADA!";
+  }
+});
+
+/* INICIALIZAÇÃO */
+carregarServicosPublicos();
+carregarGaleria();
+</script>
+</body>
+</html>
