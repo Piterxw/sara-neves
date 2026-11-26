@@ -177,7 +177,7 @@ footer a{display:inline-block;margin-top:13px;color:#eee3d7;font-size:11px}
   <div class="page-heading"><div class="kicker">SARA NEVES BROW STUDIO</div><h1>Local</h1><p>Veja a localização do estúdio no Google Maps e consulte o trajeto antes de sair.</p></div>
   <div class="content-wrap">
     <div class="location-panel">
-      <iframe class="location-map" title="Mapa de localização do Sara Neves Brow Studio" src="https://www.google.com/maps?q=-20.3522949,-41.529953&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      <div class="location-map" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:24px;text-align:center;color:var(--brown)"><span style="font-size:38px">⌖</span><strong>Localização no Google Maps</strong><span style="font-size:13px;color:var(--muted)">Abra o mapa pelo botão abaixo para ver o endereço correto.</span></div>
       <p>Toque no botão abaixo para abrir a localização diretamente no Google Maps.</p>
       <a class="primary-btn" href="https://maps.app.goo.gl/TdZsKFng3UggXwTs9" target="_blank" rel="noopener noreferrer">Abrir localização no Google Maps</a>
     </div>
@@ -213,13 +213,7 @@ footer a{display:inline-block;margin-top:13px;color:#eee3d7;font-size:11px}
 </footer>
 
 <script>
-const SUPABASE_URL = "https://upgthlpcnnskasemvzso.supabase.co";
-const SUPABASE_KEY = "sb_publishable_o9oit1hipzi18_UjCpXWwg_WsRuG67p";
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const CHAVE_PIX = "+5528999115294";
-const WHATSAPP_SARA = "5528999115294";
-const DURACAO = 40;
-
+/* NAVEGAÇÃO: inicializada antes do Supabase para não travar o menu se a biblioteca falhar */
 function abrirView(nome) {
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   const destino = document.getElementById("view-" + nome);
@@ -235,6 +229,23 @@ document.querySelectorAll("[data-view]").forEach(link => link.addEventListener("
   e.preventDefault(); abrirView(link.dataset.view);
 }));
 document.querySelectorAll("[data-open]").forEach(button=>button.addEventListener("click",()=>abrirView(button.dataset.open)));
+
+/* SUPABASE */
+const SUPABASE_URL = "https://upgthlpcnnskasemvzso.supabase.co";
+const SUPABASE_KEY = "sb_publishable_o9oit1hipzi18_UjCpXWwg_WsRuG67p";
+let db = null;
+try {
+  if (window.supabase && typeof window.supabase.createClient === "function") {
+    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  } else {
+    console.error("Biblioteca Supabase não carregou. Verifique a conexão ou o CDN.");
+  }
+} catch (erro) {
+  console.error("Não foi possível iniciar o Supabase:", erro);
+}
+const CHAVE_PIX = "+5528999115294";
+const WHATSAPP_SARA = "5528999115294";
+const DURACAO = 40;
 
 let contextoAudio=null;
 function tocarSom(tipo="toque"){
@@ -256,24 +267,35 @@ function formatarMoeda(valor){return Number(valor).toLocaleString("pt-BR",{style
 /* SERVIÇOS */
 let servicosAtivos=[];
 async function carregarServicosPublicos(){
-  const seletor=document.getElementById("servico");
+    const seletor=document.getElementById("servico");
   const cards=document.getElementById("cardsServicos");
   const preco=document.getElementById("precoSelecionado");
+
   try{
-    const {data,error}=await db.from("services").select("id,name,price,active").eq("active",true).order("created_at",{ascending:true});
-    if(error)throw error;
-    servicosAtivos=(data||[]).filter(item=>Number.isFinite(Number(item.price))&&Number(item.price)>0);
-    seletor.innerHTML='<option value="">Selecione um serviço</option>';cards.replaceChildren();
+    const {data,error}=await db
+      .from("services")
+      .select("id,name,price,active")
+      .eq("active",true)
+      .order("created_at",{ascending:true});
+
+    if(error) throw error;
+
+    servicosAtivos=(data||[]).filter(item=>
+      Number.isFinite(Number(item.price)) && Number(item.price)>0
+    );
+
+    seletor.innerHTML='<option value="">Selecione um serviço</option>';
+    cards.replaceChildren();
+
     if(!servicosAtivos.length){
-      seletor.innerHTML='<option value="">Nenhum serviço disponível</option>';
-      cards.innerHTML='<p class="empty">Nenhum serviço disponível no momento.</p>';
-      preco.textContent="";
+      seletor.innerHTML='<option value="">Serviços indisponíveis</option>';
+      cards.innerHTML='<p class="empty">Nenhum serviço cadastrado no momento.</p>';
       return;
     }
 
     servicosAtivos.forEach((item,index)=>{
       const option=document.createElement("option");
-      option.value=item.id;
+      option.value=String(item.id);
       option.textContent=`${item.name} — ${formatarMoeda(item.price)}`;
       seletor.appendChild(option);
 
@@ -306,12 +328,12 @@ async function carregarServicosPublicos(){
 }
 
 document.getElementById("servico").addEventListener("change",()=>{
-  const selecionado=servicosAtivos.find(
-    item=>String(item.id)===document.getElementById("servico").value
+  const item=servicosAtivos.find(s=>
+    String(s.id)===document.getElementById("servico").value
   );
 
   document.getElementById("precoSelecionado").textContent=
-    selecionado ? formatarMoeda(selecionado.price) : "";
+    item ? formatarMoeda(item.price) : "Selecione um serviço.";
 });
 
 
@@ -325,29 +347,29 @@ async function carregarGaleria(){
       .select("id,image_url,caption")
       .order("created_at",{ascending:false});
 
-    if(error)throw error;
+    if(error) throw error;
 
     galeria.replaceChildren();
 
-    if(!data || !data.length){
+    if(!data || data.length===0){
       galeria.innerHTML='<p class="empty">Nenhuma foto disponível no momento.</p>';
       return;
     }
 
-    data.forEach(item=>{
+    data.forEach(foto=>{
       const card=document.createElement("article");
       card.className="gallery-card";
 
       const imagem=document.createElement("img");
-      imagem.src=item.image_url;
-      imagem.alt=item.caption || "Foto da galeria";
+      imagem.src=foto.image_url;
+      imagem.alt=foto.caption || "Foto da galeria";
       imagem.loading="lazy";
 
       card.appendChild(imagem);
 
-      if(item.caption){
+      if(foto.caption){
         const legenda=document.createElement("p");
-        legenda.textContent=item.caption;
+        legenda.textContent=foto.caption;
         card.appendChild(legenda);
       }
 
@@ -355,57 +377,13 @@ async function carregarGaleria(){
     });
 
   }catch(error){
-    console.error("Erro ao carregar galeria:",error);
+    console.error("Erro na galeria:",error);
     galeria.innerHTML='<p class="empty">Não foi possível carregar a galeria.</p>';
   }
 }
 
 
 /* AVALIAÇÕES */
-async function carregarAvaliacoes(){
-  const lista=document.getElementById("avaliacoesPublicadas");
-
-  try{
-    const {data,error}=await db
-      .from("reviews")
-      .select("id,customer_name,rating,comment,created_at")
-      .eq("status","approved")
-      .order("created_at",{ascending:false});
-
-    if(error)throw error;
-
-    lista.replaceChildren();
-
-    if(!data || !data.length){
-      lista.innerHTML='<p class="empty">Seja a primeira pessoa a avaliar!</p>';
-      return;
-    }
-
-    data.forEach(item=>{
-      const card=document.createElement("article");
-      card.className="review-card";
-
-      const nome=document.createElement("h3");
-      nome.textContent=item.customer_name;
-
-      const nota=document.createElement("div");
-      nota.className="review-rating";
-      nota.textContent="★".repeat(Number(item.rating))+
-        "☆".repeat(5-Number(item.rating));
-
-      const comentario=document.createElement("p");
-      comentario.textContent=item.comment;
-
-      card.append(nome,nota,comentario);
-      lista.appendChild(card);
-    });
-
-  }catch(error){
-    console.error("Erro ao carregar avaliações:",error);
-    lista.innerHTML='<p class="empty">Não foi possível carregar as avaliações.</p>';
-  }
-}
-
 let notaSelecionada=0;
 
 const estrelas=document.querySelectorAll(".review-star");
@@ -417,11 +395,56 @@ estrelas.forEach(estrela=>{
     notaSelecionada=Number(estrela.dataset.rating);
 
     estrelas.forEach(item=>{
-      const ativa=Number(item.dataset.rating)<=notaSelecionada;
-      item.classList.toggle("active",ativa);
+      const nota=Number(item.dataset.rating);
+      item.textContent=nota<=notaSelecionada ? "★" : "☆";
+      item.classList.toggle("selected",nota<=notaSelecionada);
     });
   });
 });
+
+async function carregarAvaliacoes(){
+  const lista=document.getElementById("avaliacoesPublicadas");
+
+  try{
+    const {data,error}=await db
+      .from("reviews")
+      .select("id,customer_name,rating,comment,created_at")
+      .eq("status","approved")
+      .order("created_at",{ascending:false});
+
+    if(error) throw error;
+
+    lista.replaceChildren();
+
+    if(!data || data.length===0){
+      lista.innerHTML='<p class="empty">Ainda não temos avaliações publicadas. Seja a primeira pessoa a avaliar!</p>';
+      return;
+    }
+
+    data.forEach(item=>{
+      const card=document.createElement("article");
+      card.className="review-card";
+
+      const nome=document.createElement("h3");
+      nome.textContent=item.customer_name;
+
+      const nota=document.createElement("div");
+      nota.className="stars";
+      nota.textContent="★".repeat(Number(item.rating))+
+        "☆".repeat(5-Number(item.rating));
+
+      const comentario=document.createElement("p");
+      comentario.textContent=item.comment;
+
+      card.append(nota,nome,comentario);
+      lista.appendChild(card);
+    });
+
+  }catch(error){
+    console.error("Erro nas avaliações:",error);
+    lista.innerHTML='<p class="empty">Não foi possível carregar as avaliações.</p>';
+  }
+}
 
 formularioAvaliacao.addEventListener("submit",async evento=>{
   evento.preventDefault();
@@ -430,7 +453,7 @@ formularioAvaliacao.addEventListener("submit",async evento=>{
   const comentario=document.getElementById("comentarioAvaliacao").value.trim();
 
   if(!nome || !comentario || notaSelecionada===0){
-    mensagemAvaliacao.textContent="Preencha seu nome, comentário e escolha uma nota.";
+    mensagemAvaliacao.textContent="Preencha seu nome, escolha as estrelas e escreva seu comentário.";
     return;
   }
 
@@ -438,24 +461,27 @@ formularioAvaliacao.addEventListener("submit",async evento=>{
   botao.disabled=true;
 
   try{
-    const {error}=await db.from("reviews").insert({
+    const {error}=await db.from("reviews").insert([{
       customer_name:nome,
       rating:notaSelecionada,
       comment:comentario,
       status:"pending"
-    });
+    }]);
 
-    if(error)throw error;
+    if(error) throw error;
 
-    mensagemAvaliacao.textContent="Avaliação enviada! Ela aparecerá após aprovação.";
+    mensagemAvaliacao.textContent="Avaliação enviada! Ela aparecerá depois da aprovação.";
     formularioAvaliacao.reset();
     notaSelecionada=0;
 
-    estrelas.forEach(item=>item.classList.remove("active"));
+    estrelas.forEach(item=>{
+      item.textContent="☆";
+      item.classList.remove("selected");
+    });
 
   }catch(error){
     console.error("Erro ao enviar avaliação:",error);
-    mensagemAvaliacao.textContent="Não foi possível enviar sua avaliação. Tente novamente.";
+    mensagemAvaliacao.textContent="Não foi possível enviar. Tente novamente.";
   }finally{
     botao.disabled=false;
   }
@@ -463,102 +489,92 @@ formularioAvaliacao.addEventListener("submit",async evento=>{
 
 
 /* HORÁRIOS */
+const DURACAO=40;
+
+function dataLocalHoje(){
+  const hoje=new Date();
+  return `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,"0")}-${String(hoje.getDate()).padStart(2,"0")}`;
+}
+
 function gerarHorarios(){
   const horarios=[];
 
-  function adicionar(inicio,fim){
-    let [hora,minuto]=inicio.split(":").map(Number);
-    const [fimHora,fimMinuto]=fim.split(":").map(Number);
-
-    while(hora<fimHora || (hora===fimHora && minuto<=fimMinuto)){
-      horarios.push(
-        `${String(hora).padStart(2,"0")}:${String(minuto).padStart(2,"0")}`
-      );
-
-      minuto+=40;
-
-      if(minuto>=60){
-        hora+=Math.floor(minuto/60);
-        minuto=minuto%60;
-      }
-    }
+  for(let minutos=420;minutos+DURACAO<=660;minutos+=DURACAO){
+    horarios.push(minutos);
   }
 
-  adicionar("07:00","11:00");
-  adicionar("13:00","20:00");
+  for(let minutos=780;minutos+DURACAO<=1200;minutos+=DURACAO){
+    horarios.push(minutos);
+  }
 
-  return horarios;
+  return horarios.map(minutos=>
+    `${String(Math.floor(minutos/60)).padStart(2,"0")}:${String(minutos%60).padStart(2,"0")}`
+  );
 }
 
-function normalizarHorario(item){
-  if(typeof item==="string")return item.slice(0,5);
-
-  return String(item?.horario || item?.appointment_time || "").slice(0,5);
+function minutosHorario(valor){
+  const partes=String(valor).slice(0,5).split(":").map(Number);
+  return partes[0]*60+partes[1];
 }
 
-async function consultarHorariosOcupados(data){
+async function consultarOcupados(data){
   const {data:ocupados,error}=await db.rpc(
     "horarios_ocupados",
     {p_data:data}
   );
 
-  if(error)throw error;
+  if(error) throw error;
 
-  return (ocupados||[]).map(normalizarHorario);
+  return (ocupados||[]).map(item=>
+    typeof item==="string" ? item.slice(0,5) :
+    String(item.horario || item.appointment_time || "").slice(0,5)
+  );
 }
 
+const campoData=document.getElementById("data");
+const campoHorario=document.getElementById("horario");
+
+campoData.min=dataLocalHoje();
+
 async function atualizarHorarios(){
-  const campoData=document.getElementById("data");
-  const seletor=document.getElementById("horario");
   const data=campoData.value;
 
-  seletor.innerHTML='<option value="">Carregando horários...</option>';
+  campoHorario.innerHTML='<option value="">Carregando horários...</option>';
+  campoHorario.disabled=true;
 
   if(!data){
-    seletor.innerHTML='<option value="">Escolha uma data primeiro</option>';
+    campoHorario.innerHTML='<option value="">Escolha uma data primeiro</option>';
     return;
   }
 
   try{
-    const ocupados=await consultarHorariosOcupados(data);
-    const disponiveis=gerarHorarios().filter(horario=>!ocupados.includes(horario));
+    const ocupados=await consultarOcupados(data);
+    const livres=gerarHorarios().filter(horario=>
+      !ocupados.includes(horario)
+    );
 
-    seletor.replaceChildren();
+    campoHorario.innerHTML='<option value="">Selecione um horário</option>';
 
-    if(!disponiveis.length){
-      seletor.innerHTML='<option value="">Nenhum horário disponível</option>';
-      return;
-    }
-
-    seletor.innerHTML='<option value="">Selecione um horário</option>';
-
-    disponiveis.forEach(horario=>{
+    livres.forEach(horario=>{
       const option=document.createElement("option");
       option.value=horario;
       option.textContent=horario;
-      seletor.appendChild(option);
+      campoHorario.appendChild(option);
     });
 
+    if(!livres.length){
+      campoHorario.innerHTML='<option value="">Nenhum horário disponível</option>';
+    }else{
+      campoHorario.disabled=false;
+    }
+
   }catch(error){
-    console.error("Erro ao consultar horários:",error);
-    seletor.innerHTML='<option value="">Erro ao carregar horários</option>';
+    console.error("Erro nos horários:",error);
+    campoHorario.innerHTML='<option value="">Erro ao carregar horários</option>';
   }
 }
 
-document.getElementById("data").addEventListener("change",atualizarHorarios);
-
-
-/* DATA MÍNIMA */
-function dataLocalHoje(){
-  const hoje=new Date();
-  const ano=hoje.getFullYear();
-  const mes=String(hoje.getMonth()+1).padStart(2,"0");
-  const dia=String(hoje.getDate()).padStart(2,"0");
-
-  return `${ano}-${mes}-${dia}`;
-}
-
-document.getElementById("data").min=dataLocalHoje();
+campoData.addEventListener("change",atualizarHorarios);
 
 
 /* AGENDAMENTO */
@@ -570,15 +586,15 @@ formularioAgendamento.addEventListener("submit",async evento=>{
 
   const nome=document.getElementById("nome").value.trim();
   const telefone=document.getElementById("telefone").value.trim();
-  const data=document.getElementById("data").value;
-  const horario=document.getElementById("horario").value;
+  const data=campoData.value;
+  const horario=campoHorario.value;
   const servicoId=document.getElementById("servico").value;
 
-  const servicoSelecionado=servicosAtivos.find(
-    item=>String(item.id)===servicoId
+  const servico=servicosAtivos.find(item=>
+    String(item.id)===servicoId
   );
 
-  if(!nome || !telefone || !data || !horario || !servicoSelecionado){
+  if(!nome || !telefone || !data || !horario || !servico){
     mensagemAgendamento.textContent="Preencha todos os campos.";
     return;
   }
@@ -590,77 +606,76 @@ formularioAgendamento.addEventListener("submit",async evento=>{
 
   const botao=formularioAgendamento.querySelector('button[type="submit"]');
   botao.disabled=true;
-  mensagemAgendamento.textContent="Verificando disponibilidade...";
 
   try{
-    const ocupados=await consultarHorariosOcupados(data);
+    const ocupados=await consultarOcupados(data);
 
     if(ocupados.includes(horario)){
-      mensagemAgendamento.textContent="Esse horário acabou de ser reservado. Escolha outro.";
+      mensagemAgendamento.textContent="Esse horário acabou de ser ocupado. Escolha outro.";
       await atualizarHorarios();
       return;
     }
 
-    const {data:agendamento,error}=await db
-      .from("appointments")
-      .insert({
-        customer_name:nome,
-        customer_phone:telefone,
-        service:servicoSelecionado.name,
-        service_price:Number(servicoSelecionado.price),
-        appointment_date:data,
-        appointment_time:horario,
-        status:"pending"
-      })
-      .select()
-      .single();
+    const {error}=await db.from("appointments").insert([{
+      customer_name:nome,
+      customer_phone:telefone,
+      service:servico.name,
+      service_price:Number(servico.price),
+      appointment_date:data,
+      appointment_time:horario,
+      status:"pending"
+    }]);
 
-    if(error)throw error;
+    if(error) throw error;
+
+    const dataFormatada=data.split("-").reverse().join("/");
 
     document.getElementById("pixValor").textContent=
-      formatarMoeda(servicoSelecionado.price);
+      formatarMoeda(servico.price);
 
     document.getElementById("pixChave").textContent=CHAVE_PIX;
 
-    const mensagemWhatsApp=
-      `Olá, Sara! Acabei de fazer um agendamento.\n\n`+
-      `Nome: ${nome}\n`+
-      `Telefone: ${telefone}\n`+
-      `Serviço: ${servicoSelecionado.name}\n`+
-      `Data: ${data}\n`+
-      `Horário: ${horario}\n`+
-      `Valor: ${formatarMoeda(servicoSelecionado.price)}\n\n`+
-      `Gostaria de confirmar meu agendamento.`;
+    const textoWhatsApp=
+      `Olá, Sara! Fiz uma solicitação de agendamento.\n\n`+
+      `Nome: ${nome}\nTelefone: ${telefone}\n`+
+      `Serviço: ${servico.name}\n`+
+      `Data: ${dataFormatada}\nHorário: ${horario}\n`+
+      `Valor: ${formatarMoeda(servico.price)}`;
 
     document.getElementById("enviarComprovante").href=
-      `https://wa.me/${WHATSAPP_SARA}?text=${encodeURIComponent(mensagemWhatsApp)}`;
+      `https://wa.me/${WHATSAPP_SARA}?text=${encodeURIComponent(textoWhatsApp)}`;
 
-    document.getElementById("pixBox").hidden=false;
+    document.getElementById("pixBox").style.display="block";
 
-    mensagemAgendamento.textContent="Agendamento registrado! Faça o pagamento via Pix e envie uma mensagem para Sara.";
+    mensagemAgendamento.textContent=
+      "Solicitação registrada! Confira o Pix e envie uma mensagem para Sara.";
 
-    formularioAgendamento.reset();
-    document.getElementById("precoSelecionado").textContent="";
-    document.getElementById("horario").innerHTML=
-      '<option value="">Escolha uma data primeiro</option>';
+    campoData.value="";
+    campoHorario.innerHTML='<option value="">Escolha uma data primeiro</option>';
+    campoHorario.disabled=true;
 
   }catch(error){
-    console.error("Erro ao realizar agendamento:",error);
-    mensagemAgendamento.textContent="Não foi possível concluir o agendamento. Tente novamente.";
+    console.error("Erro no agendamento:",error);
+    mensagemAgendamento.textContent="Não foi possível registrar. Tente novamente.";
   }finally{
     botao.disabled=false;
   }
 });
 
 
-/* COPIAR CHAVE PIX */
+/* COPIAR PIX */
 document.getElementById("copiarPix").addEventListener("click",async()=>{
   try{
     await navigator.clipboard.writeText(CHAVE_PIX);
     document.getElementById("copiarPix").textContent="Copiado!";
   }catch(error){
-    console.error("Erro ao copiar Pix:",error);
-    document.getElementById("copiarPix").textContent="Não foi possível copiar";
+    const temporario=document.createElement("textarea");
+    temporario.value=CHAVE_PIX;
+    document.body.appendChild(temporario);
+    temporario.select();
+    document.execCommand("copy");
+    temporario.remove();
+    document.getElementById("copiarPix").textContent="Copiado!";
   }
 });
 
