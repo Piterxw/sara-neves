@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sara Neves | Administração</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #f8f5f0;
+  color: #49382e;
+  font-family: 'DM Sans', sans-serif;
+}
+
+header {
+  background: #49382e;
+  color: #f8f1e9;
+  padding: 25px;
+  text-align: center;
+}
+
+header h1 {
+  font: 28px 'Playfair Display', serif;
+  letter-spacing: 2px;
+}
+
+header p {
+  font-size: 10px;
+  letter-spacing: 4px;
+  margin-top: 7px;
+}
+
+main {
+  max-width: 1000px;
+  margin: 35px auto;
+  padding: 0 18px;
+}
+
+h2 {
+  font: 32px 'Playfair Display', serif;
+  margin-bottom: 8px;
+}
+
+.subtitulo {
+  color: #89796c;
+  font-size: 14px;
+  margin-bottom: 28px;
+}
+
+#login, #painel {
+  background: white;
+  padding: 25px;
+  border: 1px solid #e9dfd2;
+  border-radius: 12px;
+}
+
+label {
+  display: block;
+  font-size: 12px;
+  margin: 16px 0 7px;
+}
+
+input, select {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #e3d6c9;
+  border-radius: 7px;
+  background: #fffdfa;
+  font: inherit;
+}
+
+button {
+  padding: 13px 18px;
+  border: none;
+  border-radius: 7px;
+  background: #725642;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+}
+
+#login button {
+  width: 100%;
+  margin-top: 22px;
+}
+
+#mensagem {
+  margin-top: 15px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.topo-painel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.agendamento {
+  border: 1px solid #e9dfd2;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 14px;
+  background: #fffdfa;
+}
+
+.agendamento h3 {
+  font: 21px 'Playfair Display', serif;
+  margin-bottom: 10px;
+}
+
+.detalhe {
+  font-size: 13px;
+  color: #79695c;
+  line-height: 1.9;
+}
+
+.status {
+  display: inline-block;
+  padding: 6px 10px;
+  margin: 12px 0;
+  border-radius: 30px;
+  background: #f1e6d8;
+  font-size: 11px;
+}
+
+.acoes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.cancelar { background: #8d4e46; }
+.sair { background: transparent; color: white; border: 1px solid #bca995; }
+#lista { margin-top: 15px; }
+
+.oculto { display: none; }
+
+@media(min-width: 650px) {
+  #login { max-width: 430px; margin: auto; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>SARA NEVES</h1>
+  <p>PAINEL ADMINISTRATIVO</p>
+</header>
+
+<main>
+  <section id="login">
+    <h2>Bem-vinda</h2>
+    <p class="subtitulo">Entre para acessar os agendamentos.</p>
+
+    <form id="formLogin">
+      <label for="email">E-MAIL</label>
+      <input id="email" type="email" required placeholder="Seu e-mail">
+
+      <label for="senha">SENHA</label>
+      <input id="senha" type="password" required placeholder="Sua senha">
+
+      <button type="submit">Entrar no painel</button>
+    </form>
+
+    <p id="mensagem" role="status"></p>
+  </section>
+
+  <section id="painel" class="oculto">
+    <div class="topo-painel">
+      <div>
+        <h2>Agendamentos</h2>
+        <p class="subtitulo">Gerencie as solicitações dos clientes.</p>
+      </div>
+      <div class="acoes">
+        <button id="atualizar">Atualizar</button>
+        <button id="sair" class="cancelar">Sair</button>
+      </div>
+    </div>
+
+    <label for="filtro">FILTRAR AGENDAMENTOS</label>
+    <select id="filtro">
+      <option value="todos">Todos</option>
+      <option value="pending">Pendentes</option>
+      <option value="confirmed">Confirmados</option>
+      <option value="cancelled">Cancelados</option>
+      <option value="awaiting_payment">Aguardando pagamento</option>
+    </select>
+
+    <div id="lista">Carregando...</div>
+  </section>
+</main>
+
+<script>
+const SUPABASE_URL = "https://upgthlpcnnskasemvzso.supabase.co";
+const SUPABASE_KEY = "sb_publishable_o9oit1hipzi18_UjCpXWwg_WsRuG67p";
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+const login = document.getElementById("login");
+const painel = document.getElementById("painel");
+const mensagem = document.getElementById("mensagem");
+const lista = document.getElementById("lista");
+
+const nomesStatus = {
+  pending: "Pendente",
+  confirmed: "Confirmado",
+  cancelled: "Cancelado",
+  awaiting_payment: "Aguardando pagamento"
+};
+
+function mostrarPainel() {
+  login.classList.add("oculto");
+  painel.classList.remove("oculto");
+}
+
+function mostrarLogin() {
+  painel.classList.add("oculto");
+  login.classList.remove("oculto");
+}
+
+async function verificarAdmin() {
+  const { data: { user }, error } = await db.auth.getUser();
+
+  if (error || !user) {
+    mostrarLogin();
+    return false;
+  }
+
+  const { data, error: adminError } = await db
+    .from("admin_users")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (adminError || !data) {
+    mensagem.textContent =
+      "Este usuário não tem autorização para acessar o painel.";
+    await db.auth.signOut();
+    mostrarLogin();
+    return false;
+  }
+
+  mostrarPainel();
+  await carregarAgendamentos();
+  return true;
+}
+
+document.getElementById("formLogin").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  mensagem.textContent = "Verificando acesso...";
+
+  const email = document.getElementById("email").value.trim();
+  const senha = document.getElementById("senha").value;
+
+  const { error } = await db.auth.signInWithPassword({
+    email,
+    password: senha
+  });
+
+  if (error) {
+    mensagem.textContent = "Não foi possível entrar. Confira seus dados.";
+    return;
+  }
+
+  await verificarAdmin();
+});
+
+async function carregarAgendamentos() {
+  lista.textContent = "Carregando agendamentos...";
+
+  const filtro = document.getElementById("filtro").value;
+
+  let consulta = db
+    .from("appointments")
+    .select("*")
+    .order("appointment_date", { ascending: true })
+    .order("appointment_time", { ascending: true });
+
+  if (filtro !== "todos") {
+    consulta = consulta.eq("status", filtro);
+  }
+
+  const { data, error } = await consulta;
+
+  if (error) {
+    lista.textContent = "Erro ao carregar agendamentos.";
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    lista.textContent = "Nenhum agendamento encontrado.";
+    return;
+  }
+
+  lista.replaceChildren();
+
+  data.forEach((item) => {
+    const card = document.createElement("article");
+    card.className = "agendamento";
+
+    const titulo = document.createElement("h3");
+    titulo.textContent = item.customer_name || "Cliente";
+
+    const detalhes = document.createElement("p");
+    detalhes.className = "detalhe";
+    detalhes.textContent =
+      `Serviço: ${item.service} | Data: ${item.appointment_date} | Horário: ${item.appointment_time} | WhatsApp: ${item.customer_phone}`;
+
+    const status = document.createElement("span");
+    status.className = "status";
+    status.textContent = nomesStatus[item.status] || item.status;
+
+    const acoes = document.createElement("div");
+    acoes.className = "acoes";
+
+    if (item.status !== "confirmed" && item.status !== "cancelled") {
+      const confirmar = document.createElement("button");
+      confirmar.textContent = "Confirmar";
+      confirmar.addEventListener("click", () =>
+        alterarStatus(item.id, "confirmed")
+      );
+      acoes.append(confirmar);
+    }
+
+    if (item.status !== "cancelled") {
+      const cancelar = document.createElement("button");
+      cancelar.textContent = "Cancelar";
+      cancelar.className = "cancelar";
+      cancelar.addEventListener("click", () =>
+        alterarStatus(item.id, "cancelled")
+      );
+      acoes.append(cancelar);
+    }
+
+    card.append(titulo, detalhes, status, acoes);
+    lista.append(card);
+  });
+}
+
+async function alterarStatus(id, status) {
+  const { error } = await db
+    .from("appointments")
+    .update({ status })
+    .eq("id", id);
+
+  if (error) {
+    alert("Não foi possível atualizar o agendamento.");
+    return;
+  }
+
+  await carregarAgendamentos();
+}
+
+document.getElementById("atualizar").addEventListener("click", carregarAgendamentos);
+document.getElementById("filtro").addEventListener("change", carregarAgendamentos);
+
+document.getElementById("sair").addEventListener("click", async () => {
+  await db.auth.signOut();
+  mostrarLogin();
+});
+
+db.auth.onAuthStateChange((event, session) => {
+  if (event === "SIGNED_OUT") mostrarLogin();
+});
+
+verificarAdmin();
+</script>
+
+</body>
+  </html>
+  
