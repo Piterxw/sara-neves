@@ -1,297 +1,293 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sara Neves | Brow Studio</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root {
-  --cream: #f8f5f0;
-  --beige: #e9dfd2;
-  --brown: #594437;
-  --gold: #b69a78;
-  --text: #46382f;
+  --cream:#f8f5f0;
+  --beige:#e9dfd2;
+  --brown:#594437;
+  --gold:#b69a78;
+  --text:#46382f;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-html { scroll-behavior: smooth; }
+* {box-sizing:border-box;margin:0;padding:0}
+html {scroll-behavior:smooth}
 
 body {
-  background: var(--cream);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
+  background:var(--cream);
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
 }
 
 header {
-  height: 82px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 8%;
-  background: rgba(248,245,240,.96);
-  border-bottom: 1px solid #e9dfd2;
+  min-height:82px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 8%;
+  background:rgba(248,245,240,.97);
+  border-bottom:1px solid var(--beige);
 }
 
 .logo {
-  font-family: 'Playfair Display', serif;
-  font-size: 25px;
-  letter-spacing: 2px;
+  font-family:'Playfair Display',serif;
+  font-size:25px;
+  letter-spacing:2px;
 }
 
 .logo small {
-  display: block;
-  text-align: center;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 9px;
-  letter-spacing: 5px;
-  margin-top: 3px;
+  display:block;
+  text-align:center;
+  font-family:'DM Sans',sans-serif;
+  font-size:9px;
+  letter-spacing:5px;
+  margin-top:3px;
+}
+
+nav {
+  display:flex;
+  gap:18px;
+  flex-wrap:wrap;
 }
 
 nav a {
-  color: var(--brown);
-  text-decoration: none;
-  margin-left: 25px;
-  font-size: 12px;
-  letter-spacing: 1px;
+  color:var(--brown);
+  text-decoration:none;
+  font-size:11px;
+  letter-spacing:1px;
 }
 
 .hero {
-  min-height: 620px;
-  display: flex;
-  align-items: center;
-  padding: 70px 9%;
+  min-height:620px;
+  display:flex;
+  align-items:center;
+  padding:70px 9%;
   background:
-    linear-gradient(90deg, rgba(42,31,24,.68), rgba(42,31,24,.12)),
+    linear-gradient(90deg,rgba(42,31,24,.68),rgba(42,31,24,.12)),
     url('https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=1800&q=85')
-    center 38% / cover;
-  color: white;
+    center 38%/cover;
+  color:white;
 }
 
-.hero-content { max-width: 520px; }
-
+.hero-content {max-width:520px}
 .eyebrow {
-  font-size: 11px;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  margin-bottom: 24px;
+  font-size:11px;
+  letter-spacing:4px;
+  margin-bottom:24px;
 }
 
 .hero h1 {
-  font-family: 'Playfair Display', serif;
-  font-size: clamp(45px, 7vw, 76px);
-  font-weight: 400;
-  line-height: 1.08;
-  margin-bottom: 24px;
+  font-family:'Playfair Display',serif;
+  font-size:clamp(45px,7vw,76px);
+  font-weight:400;
+  line-height:1.08;
+  margin-bottom:24px;
 }
 
 .hero p {
-  font-size: 15px;
-  line-height: 1.8;
-  max-width: 390px;
-  color: #f2e9df;
+  font-size:15px;
+  line-height:1.8;
+  max-width:390px;
+  color:#f2e9df;
 }
 
 .button {
-  display: inline-block;
-  margin-top: 32px;
-  padding: 17px 30px;
-  background: #e8d8c4;
-  color: #49372d;
-  text-decoration: none;
-  font-size: 11px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  transition: .3s;
+  display:inline-block;
+  margin-top:32px;
+  padding:17px 30px;
+  background:#e8d8c4;
+  color:#49372d;
+  text-decoration:none;
+  font-size:11px;
+  letter-spacing:2px;
+  text-transform:uppercase;
 }
 
-.button:hover { background: white; }
-
 .intro {
-  padding: 100px 20px 75px;
-  text-align: center;
+  padding:100px 20px 75px;
+  text-align:center;
 }
 
 .kicker {
-  color: var(--gold);
-  text-transform: uppercase;
-  letter-spacing: 4px;
-  font-size: 10px;
-  margin-bottom: 18px;
+  color:var(--gold);
+  text-transform:uppercase;
+  letter-spacing:4px;
+  font-size:10px;
+  margin-bottom:18px;
 }
 
 h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: clamp(32px, 5vw, 48px);
-  font-weight: 400;
+  font-family:'Playfair Display',serif;
+  font-size:clamp(32px,5vw,48px);
+  font-weight:400;
 }
 
 .intro p {
-  max-width: 520px;
-  margin: 20px auto 0;
-  line-height: 1.9;
-  font-size: 14px;
-  color: #806f61;
+  max-width:520px;
+  margin:20px auto 0;
+  line-height:1.9;
+  font-size:14px;
+  color:#806f61;
 }
 
-.services {
-  padding: 35px 8% 100px;
-}
+.services {padding:35px 8% 100px}
 
 .service-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 22px;
-  max-width: 1100px;
-  margin: 45px auto 0;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:22px;
+  max-width:1100px;
+  margin:45px auto 0;
 }
 
 .service-card {
-  background: #fffdfa;
-  border: 1px solid #e9dfd2;
-  padding: 38px 25px;
-  text-align: center;
-  transition: .3s;
-}
-
-.service-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 15px 35px #59443712;
+  background:#fffdfa;
+  border:1px solid var(--beige);
+  padding:38px 25px;
+  text-align:center;
 }
 
 .service-number {
-  color: var(--gold);
-  font-family: 'Playfair Display', serif;
-  font-size: 28px;
+  color:var(--gold);
+  font-family:'Playfair Display',serif;
+  font-size:28px;
 }
 
 .service-card h3 {
-  font-family: 'Playfair Display', serif;
-  font-size: 23px;
-  font-weight: 400;
-  margin: 18px 0 12px;
+  font-family:'Playfair Display',serif;
+  font-size:23px;
+  font-weight:400;
+  margin:18px 0 12px;
 }
 
 .service-card p {
-  color: #8c7b6e;
-  font-size: 13px;
-  line-height: 1.7;
+  color:#8c7b6e;
+  font-size:13px;
+  line-height:1.7;
 }
 
 .booking {
-  background: var(--beige);
-  padding: 95px 20px;
+  background:var(--beige);
+  padding:95px 20px;
 }
 
 .booking-wrap {
-  max-width: 650px;
-  margin: auto;
-  text-align: center;
+  max-width:650px;
+  margin:auto;
+  text-align:center;
 }
 
-.booking-wrap > p {
-  margin: 15px auto 35px;
-  color: #78675b;
-  line-height: 1.7;
-  font-size: 14px;
+.booking-wrap>p {
+  margin:15px auto 35px;
+  color:#78675b;
+  line-height:1.7;
+  font-size:14px;
 }
 
 form {
-  background: #fffdfa;
-  padding: 35px;
-  text-align: left;
-  box-shadow: 0 12px 35px #5944370d;
+  background:#fffdfa;
+  padding:35px;
+  text-align:left;
+  box-shadow:0 12px 35px #5944370d;
 }
 
 label {
-  display: block;
-  margin: 17px 0 8px;
-  font-size: 12px;
-  letter-spacing: 1px;
+  display:block;
+  margin:17px 0 8px;
+  font-size:12px;
+  letter-spacing:1px;
 }
 
-input, select {
-  width: 100%;
-  padding: 15px;
-  border: 1px solid #e5d9cc;
-  background: #fff;
-  color: var(--text);
-  font-family: inherit;
-  font-size: 14px;
-  outline: none;
+input,select {
+  width:100%;
+  padding:15px;
+  border:1px solid #e5d9cc;
+  background:white;
+  color:var(--text);
+  font-family:inherit;
+  font-size:14px;
+  outline:none;
 }
 
-input:focus, select:focus { border-color: var(--gold); }
+input:focus,select:focus {border-color:var(--gold)}
 
 .submit {
-  width: 100%;
-  margin-top: 28px;
-  padding: 18px;
-  background: var(--brown);
-  color: white;
-  border: none;
-  font-family: inherit;
-  letter-spacing: 2px;
-  font-size: 11px;
-  cursor: pointer;
-  text-transform: uppercase;
+  width:100%;
+  margin-top:28px;
+  padding:18px;
+  background:var(--brown);
+  color:white;
+  border:none;
+  font-family:inherit;
+  letter-spacing:2px;
+  font-size:11px;
+  cursor:pointer;
+  text-transform:uppercase;
 }
 
-.submit:disabled { opacity: .6; }
+.submit:disabled {opacity:.6;cursor:not-allowed}
 
 .notice {
-  margin-top: 18px;
-  color: #88786c;
-  font-size: 11px;
-  line-height: 1.7;
+  margin-top:18px;
+  color:#88786c;
+  font-size:11px;
+  line-height:1.7;
 }
 
 #mensagem {
-  margin-top: 18px;
-  font-size: 13px;
-  text-align: center;
-  line-height: 1.6;
+  margin-top:18px;
+  font-size:13px;
+  text-align:center;
+  line-height:1.6;
 }
 
 .contact {
-  text-align: center;
-  padding: 85px 20px;
+  text-align:center;
+  padding:85px 20px;
 }
 
 .contact p {
-  margin-top: 15px;
-  color: #806f61;
-  font-size: 14px;
+  margin-top:15px;
+  color:#806f61;
+  font-size:14px;
 }
 
 footer {
-  padding: 35px 20px;
-  background: #49382e;
-  color: #eee3d7;
-  text-align: center;
+  padding:35px 20px;
+  background:#49382e;
+  color:#eee3d7;
+  text-align:center;
 }
 
-footer .logo { font-size: 23px; }
-footer p { margin-top: 12px; font-size: 11px; letter-spacing: 1px; }
+footer .logo {font-size:23px}
+footer p {margin-top:12px;font-size:11px;letter-spacing:1px}
 
-@media(max-width: 700px) {
-  header { padding: 0 5%; height: 75px; }
-  nav a { margin-left: 10px; font-size: 10px; }
-  .hero { min-height: 550px; padding: 55px 8%; background-position: 58% center; }
-  .service-grid { grid-template-columns: 1fr; }
-  .services { padding-left: 7%; padding-right: 7%; }
-  form { padding: 24px 19px; }
+.admin-link {
+  display:inline-block;
+  margin-top:15px;
+  color:#eee3d7;
+  font-size:11px;
+  text-decoration:underline;
 }
 
-@media(max-width: 380px) {
-  nav a { margin-left: 6px; font-size: 9px; }
-  .logo { font-size: 21px; }
+@media(max-width:700px) {
+  header {padding:12px 5%;gap:12px;flex-wrap:wrap}
+  nav {gap:12px}
+  nav a {font-size:10px}
+  .hero {min-height:550px;padding:55px 8%;background-position:58% center}
+  .service-grid {grid-template-columns:1fr}
+  .services {padding-left:7%;padding-right:7%}
+  form {padding:24px 19px}
 }
 </style>
 </head>
@@ -303,9 +299,11 @@ footer p { margin-top: 12px; font-size: 11px; letter-spacing: 1px; }
     SARA NEVES
     <small>BROW STUDIO</small>
   </div>
+
   <nav>
     <a href="#servicos">SERVIÇOS</a>
     <a href="#agendar">AGENDAR</a>
+    <a href="admin.html">ÁREA ADM</a>
   </nav>
 </header>
 
@@ -321,11 +319,7 @@ footer p { margin-top: 12px; font-size: 11px; letter-spacing: 1px; }
 <section class="intro">
   <div class="kicker">SARA NEVES BROW STUDIO</div>
   <h2>Um detalhe faz toda a diferença.</h2>
-  <p>
-    Cada sobrancelha tem sua própria beleza.
-    Nosso objetivo é valorizar seus traços com
-    cuidado, atenção e delicadeza.
-  </p>
+  <p>Cada sobrancelha tem sua própria beleza. Nosso objetivo é valorizar seus traços com cuidado, atenção e delicadeza.</p>
 </section>
 
 <section class="services" id="servicos">
@@ -359,7 +353,7 @@ footer p { margin-top: 12px; font-size: 11px; letter-spacing: 1px; }
   <div class="booking-wrap">
     <div class="kicker">RESERVE SEU MOMENTO</div>
     <h2>Agende seu horário</h2>
-    <p>Preencha os dados abaixo para solicitar seu atendimento. A confirmação será feita pelo WhatsApp.</p>
+    <p>Escolha uma data e veja os horários disponíveis. A confirmação será feita pelo WhatsApp.</p>
 
     <form id="formAgendamento">
       <label for="nome">NOME COMPLETO</label>
@@ -379,15 +373,19 @@ footer p { margin-top: 12px; font-size: 11px; letter-spacing: 1px; }
       <label for="data">DATA DESEJADA</label>
       <input id="data" type="date" required>
 
-      <label for="horario">HORÁRIO DESEJADO</label>
-      <input id="horario" type="time" required>
+      <label for="horario">HORÁRIO DISPONÍVEL</label>
+      <select id="horario" required disabled>
+        <option value="">Primeiro escolha a data</option>
+      </select>
 
       <button class="submit" id="botaoEnviar" type="submit">Solicitar agendamento</button>
 
       <p class="notice">
+        Cada atendimento dura aproximadamente 40 minutos.
         O envio representa uma solicitação, não uma confirmação automática.
         Aguarde o retorno pelo WhatsApp.
       </p>
+
       <p id="mensagem" role="status"></p>
     </form>
   </div>
@@ -404,6 +402,7 @@ footer p { margin-top: 12px; font-size: 11px; letter-spacing: 1px; }
   <div class="logo">SARA NEVES</div>
   <p>BROW STUDIO · BELEZA EM CADA DETALHE</p>
   <p>© 2026 Sara Neves. Todos os direitos reservados.</p>
+  <a class="admin-link" href="admin.html">Acesso administrativo</a>
 </footer>
 
 <script>
@@ -416,32 +415,141 @@ const form = document.getElementById("formAgendamento");
 const mensagem = document.getElementById("mensagem");
 const botao = document.getElementById("botaoEnviar");
 const campoData = document.getElementById("data");
+const campoHorario = document.getElementById("horario");
 
-const hoje = new Date();
-const hojeLocal = [
-  hoje.getFullYear(),
-  String(hoje.getMonth() + 1).padStart(2, "0"),
-  String(hoje.getDate()).padStart(2, "0")
-].join("-");
+const DURACAO = 40;
+let horariosDisponiveis = [];
 
-campoData.min = hojeLocal;
+function dataLocal() {
+  const agora = new Date();
+  return [
+    agora.getFullYear(),
+    String(agora.getMonth() + 1).padStart(2, "0"),
+    String(agora.getDate()).padStart(2, "0")
+  ].join("-");
+}
 
-form.addEventListener("submit", async (event) => {
+campoData.min = dataLocal();
+
+function minutosDoHorario(horario) {
+  const partes = horario.split(":").map(Number);
+  return partes[0] * 60 + partes[1];
+}
+
+function gerarHorarios() {
+  const horarios = [];
+
+  // Manhã: 07h às 11h
+  for (let minutos = 7 * 60; minutos + DURACAO <= 11 * 60; minutos += DURACAO) {
+    horarios.push(minutos);
+  }
+
+  // Tarde: 13h às 20h
+  for (let minutos = 13 * 60; minutos + DURACAO <= 20 * 60; minutos += DURACAO) {
+    horarios.push(minutos);
+  }
+
+  return horarios.map(minutos => {
+    const horas = String(Math.floor(minutos / 60)).padStart(2, "0");
+    const mins = String(minutos % 60).padStart(2, "0");
+    return `${horas}:${mins}`;
+  });
+}
+
+async function carregarHorarios() {
+  const data = campoData.value;
+
+  campoHorario.innerHTML = '<option value="">Carregando horários...</option>';
+  campoHorario.disabled = true;
+  horariosDisponiveis = [];
+
+  if (!data) {
+    campoHorario.innerHTML = '<option value="">Primeiro escolha a data</option>';
+    return;
+  }
+
+  if (data < dataLocal()) {
+    campoHorario.innerHTML = '<option value="">Escolha uma data válida</option>';
+    return;
+  }
+
+  mensagem.textContent = "";
+
+  try {
+    const { data: ocupados, error } = await db.rpc(
+      "horarios_ocupados",
+      { p_data: data }
+    );
+
+    if (error) throw error;
+
+    const agora = new Date();
+    const ehHoje = data === dataLocal();
+    const minutosAgora = agora.getHours() * 60 + agora.getMinutes();
+
+    const horarios = gerarHorarios();
+
+    horariosDisponiveis = horarios.filter(horario => {
+      const inicio = minutosDoHorario(horario);
+      const fim = inicio + DURACAO;
+
+      if (ehHoje && inicio <= minutosAgora) return false;
+
+      const conflito = (ocupados || []).some(item => {
+        const ocupadoInicio = minutosDoHorario(item.horario);
+        const ocupadoFim = ocupadoInicio + Number(item.duracao || DURACAO);
+
+        return inicio < ocupadoFim && fim > ocupadoInicio;
+      });
+
+      return !conflito;
+    });
+
+    campoHorario.innerHTML = "";
+
+    if (horariosDisponiveis.length === 0) {
+      campoHorario.innerHTML = '<option value="">Nenhum horário disponível</option>';
+      mensagem.textContent = "Não há horários livres nessa data. Escolha outro dia.";
+      return;
+    }
+
+    campoHorario.innerHTML = '<option value="">Selecione um horário</option>';
+
+    horariosDisponiveis.forEach(horario => {
+      const option = document.createElement("option");
+      option.value = horario;
+      option.textContent = horario;
+      campoHorario.appendChild(option);
+    });
+
+    campoHorario.disabled = false;
+
+  } catch (error) {
+    console.error(error);
+    campoHorario.innerHTML = '<option value="">Erro ao carregar horários</option>';
+    mensagem.textContent = "Não foi possível consultar os horários. Atualize a página e tente novamente.";
+  }
+}
+
+campoData.addEventListener("change", carregarHorarios);
+
+form.addEventListener("submit", async event => {
   event.preventDefault();
 
   const nome = document.getElementById("nome").value.trim();
   const telefone = document.getElementById("telefone").value.trim();
   const servico = document.getElementById("servico").value;
   const data = campoData.value;
-  const horario = document.getElementById("horario").value;
+  const horario = campoHorario.value;
 
   if (!nome || !telefone || !servico || !data || !horario) {
-    mensagem.textContent = "Preencha todos os campos.";
+    mensagem.textContent = "Preencha todos os campos e escolha um horário.";
     return;
   }
 
-  if (data < hojeLocal) {
-    mensagem.textContent = "Escolha uma data válida.";
+  if (!horariosDisponiveis.includes(horario)) {
+    mensagem.textContent = "Esse horário não está disponível. Escolha outro.";
+    await carregarHorarios();
     return;
   }
 
@@ -450,6 +558,30 @@ form.addEventListener("submit", async (event) => {
   mensagem.textContent = "";
 
   try {
+    // Consulta novamente antes de salvar para reduzir conflitos.
+    const { data: ocupados, error: erroConsulta } = await db.rpc(
+      "horarios_ocupados",
+      { p_data: data }
+    );
+
+    if (erroConsulta) throw erroConsulta;
+
+    const inicio = minutosDoHorario(horario);
+    const fim = inicio + DURACAO;
+
+    const conflito = (ocupados || []).some(item => {
+      const ocupadoInicio = minutosDoHorario(item.horario);
+      const ocupadoFim = ocupadoInicio + Number(item.duracao || DURACAO);
+
+      return inicio < ocupadoFim && fim > ocupadoInicio;
+    });
+
+    if (conflito) {
+      mensagem.textContent = "Esse horário acabou de ser reservado. Escolha outro.";
+      await carregarHorarios();
+      return;
+    }
+
     const { error } = await db.from("appointments").insert([{
       customer_name: nome,
       customer_phone: telefone,
@@ -471,6 +603,7 @@ form.addEventListener("submit", async (event) => {
       `Serviço: ${servico}`,
       `Data: ${data}`,
       `Horário: ${horario}`,
+      "Duração aproximada: 40 minutos",
       "",
       "Aguardo a confirmação!"
     ].join("\n");
@@ -481,6 +614,10 @@ form.addEventListener("submit", async (event) => {
     );
 
     form.reset();
+    campoHorario.innerHTML = '<option value="">Primeiro escolha a data</option>';
+    campoHorario.disabled = true;
+    horariosDisponiveis = [];
+
   } catch (error) {
     console.error(error);
     mensagem.textContent = "Não foi possível enviar. Tente novamente.";
@@ -492,5 +629,4 @@ form.addEventListener("submit", async (event) => {
 </script>
 
 </body>
-  </html>
-      
+                                                                                                 </html>
