@@ -378,7 +378,7 @@ async function carregarAvaliacoes() {
   lista.replaceChildren();
   try {
     
-ta,error} = await db.from("reviews")
+const {data,error} = await db.from("reviews")
       .select("id,customer_name,rating,comment,created_at")
       .eq("status","approved")
       .order("created_at",{ascending:false});
