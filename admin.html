@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -30,7 +31,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .photo img{width:100%;height:150px;object-fit:cover;display:block}
 .photo p{padding:0 10px;overflow-wrap:anywhere}
 .photo button{margin:0;border-radius:0}
-#mensagem,#erroLogin{padding:10px 0;font-size:14px}
+#mensagem,#erroLogin{padding:10px 0;font-size:14px;overflow-wrap:anywhere}
 .status{font-size:13px;color:#80634f}
 .acoes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:12px}
 .acoes button{margin:0}
@@ -54,10 +55,10 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .etiqueta.pago{background:#e1eee1;color:#35613b}
 .etiqueta.pendente{background:#f6ead6;color:#805d26}
 @media(max-width:520px){
- .card{padding:16px}
- .tabs button{min-width:calc(50% - 8px)}
- .acoes{grid-template-columns:1fr}
- .tabela-historico th,.tabela-historico td{font-size:12px;padding:9px 4px}
+.card{padding:16px}
+.tabs button{min-width:calc(50% - 8px)}
+.acoes{grid-template-columns:1fr}
+.tabela-historico th,.tabela-historico td{font-size:12px;padding:9px 4px}
 }
 </style>
 </head>
@@ -72,11 +73,11 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <section id="login" class="card">
 <h2>Entrar no painel</h2>
 <form id="formLogin">
-<input id="email" type="email" placeholder="Seu e-mail" required>
-<input id="senha" type="password" placeholder="Sua senha" required>
-<button type="submit">Entrar</button>
+<input id="email" type="email" placeholder="Seu e-mail" autocomplete="username" required>
+<input id="senha" type="password" placeholder="Sua senha" autocomplete="current-password" required>
+<button id="botaoLogin" type="submit">Entrar</button>
 </form>
-<div id="erroLogin"></div>
+<div id="erroLogin" role="alert"></div>
 </section>
 
 <section id="painel" class="hidden">
@@ -157,13 +158,25 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </main>
 
 <script>
+"use strict";
+
+/* CONEXÃO */
 const SUPABASE_URL = "https://upgthlpcnnskasemvzso.supabase.co";
 const SUPABASE_KEY = "sb_publishable_o9oit1hipzi18_UjCpXWwg_WsRuG67p";
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const login = document.getElementById("login");
 const painel = document.getElementById("painel");
 const mensagem = document.getElementById("mensagem");
+const erroLogin = document.getElementById("erroLogin");
+const botaoLogin = document.getElementById("botaoLogin");
+
+let db;
+
+if (window.supabase && window.supabase.createClient) {
+  db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} else {
+  erroLogin.textContent = "Não foi possível carregar o Supabase. Atualize a página e tente novamente.";
+}
 
 function avisar(texto) {
   mensagem.textContent = texto;
@@ -179,6 +192,7 @@ function dinheiro(valor) {
 function formatarData(data) {
   if (!data) return "";
   const partes = data.split("-");
+  if (partes.length !== 3) return data;
   return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
 
@@ -192,6 +206,7 @@ function mostrarPainel() {
   painel.classList.remove("hidden");
 }
 
+/* VERIFICAÇÃO DO ADMINISTRADOR */
 async function verificarAdmin() {
   const { data: { user }, error } = await db.auth.getUser();
 
@@ -206,11 +221,18 @@ async function verificarAdmin() {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (erroAdmin || !data) {
+  if (erroAdmin) {
+    console.error("Erro ao verificar administrador:", erroAdmin);
     await db.auth.signOut();
     mostrarLogin();
-    document.getElementById("erroLogin").textContent =
-      "Esta conta não tem permissão de administrador.";
+    erroLogin.textContent = "Erro ao verificar permissão: " + erroAdmin.message;
+    return false;
+  }
+
+  if (!data) {
+    await db.auth.signOut();
+    mostrarLogin();
+    erroLogin.textContent = "Esta conta não está cadastrada como administradora.";
     return false;
   }
 
@@ -218,38 +240,66 @@ async function verificarAdmin() {
   return true;
 }
 
+function carregarDadosIniciais() {
+  carregarAgendamentos();
+  carregarFotos();
+  carregarServicos();
+  carregarAvaliacoesPendentes();
+}
+
 /* LOGIN */
 document.getElementById("formLogin").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const email = document.getElementById("email").value.trim();
-  const senha = document.getElementById("senha").value;
-  const erro = document.getElementById("erroLogin");
-
-  erro.textContent = "Entrando...";
-
-  const { error } = await db.auth.signInWithPassword({
-    email,
-    password: senha
-  });
-
-  if (error) {
-    erro.textContent = "Não foi possível entrar. Confira e-mail e senha.";
+  if (!db) {
+    erroLogin.textContent = "Conexão com o Supabase indisponível. Atualize a página.";
     return;
   }
 
-  if (await verificarAdmin()) {
-    erro.textContent = "";
-    carregarAgendamentos();
-    carregarFotos();
-    carregarServicos();
-    carregarAvaliacoesPendentes();
+  const email = document.getElementById("email").value.trim();
+  const senha = document.getElementById("senha").value;
+
+  erroLogin.textContent = "Verificando acesso...";
+  botaoLogin.disabled = true;
+  botaoLogin.textContent = "Entrando...";
+
+  try {
+    const { error } = await db.auth.signInWithPassword({
+      email,
+      password: senha
+    });
+
+    if (error) {
+      erroLogin.textContent = "Erro no login: " + error.message;
+      return;
+    }
+
+    const autorizado = await verificarAdmin();
+
+    if (autorizado) {
+      erroLogin.textContent = "";
+      carregarDadosIniciais();
+    }
+  } catch (error) {
+    console.error(error);
+    erroLogin.textContent = "Falha ao entrar: " + (error.message || "Erro desconhecido.");
+  } finally {
+    botaoLogin.disabled = false;
+    botaoLogin.textContent = "Entrar";
   }
 });
 
+/* SAIR */
 document.getElementById("sair").addEventListener("click", async () => {
-  await db.auth.signOut();
+  const { error } = await db.auth.signOut();
+
+  if (error) {
+    avisar("Erro ao sair: " + error.message);
+    return;
+  }
+
   mostrarLogin();
+  erroLogin.textContent = "";
 });
 
 /* ABAS */
@@ -560,7 +610,7 @@ async function carregarFinanceiro() {
     valor.textContent = "Valor: " + dinheiro(item.service_price);
 
     const etiqueta = document.createElement("span");
-    etiqueta.className = "etiqueta " +
+     etiqueta.className = "etiqueta " +
       (item.payment_status === "paid" ? "pago" : "pendente");
     etiqueta.textContent =
       item.payment_status === "paid" ? "Pago" : "Pendente";
@@ -604,8 +654,7 @@ async function carregarHistorico() {
     return;
   }
 
-  data.forEach(item => {: 
-    
+  data.forEach(item => {
     const div = document.createElement("div");
     div.className = "item";
 
@@ -657,9 +706,9 @@ document.getElementById("formFoto").addEventListener("submit", async (e) => {
     return;
   }
 
-  const { data: { user } } = await db.auth.getUser();
+  const { data: { user }, error: erroUsuario } = await db.auth.getUser();
 
-  if (!user) {
+  if (erroUsuario || !user) {
     avisar("Sua sessão expirou. Entre novamente.");
     mostrarLogin();
     return;
@@ -668,46 +717,50 @@ document.getElementById("formFoto").addEventListener("submit", async (e) => {
   botao.disabled = true;
   avisar("Enviando foto...");
 
-  const extensao = arquivo.name.split(".").pop().toLowerCase();
-  const caminho = `${user.id}/${Date.now()}-${crypto.randomUUID()}.${extensao}`;
+  try {
+    const extensao = arquivo.name.split(".").pop().toLowerCase();
+    const caminho = `${user.id}/${Date.now()}-${crypto.randomUUID()}.${extensao}`;
 
-  const { error: erroUpload } = await db.storage
-    .from("galeria-clientes")
-    .upload(caminho, arquivo, {
-      cacheControl: "3600",
-      upsert: false,
-      contentType: arquivo.type
-    });
+    const { error: erroUpload } = await db.storage
+      .from("galeria-clientes")
+      .upload(caminho, arquivo, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: arquivo.type
+      });
 
-  if (erroUpload) {
-    avisar("Erro ao enviar foto: " + erroUpload.message);
+    if (erroUpload) {
+      avisar("Erro ao enviar foto: " + erroUpload.message);
+      return;
+    }
+
+    const { data: urlData } = db.storage
+      .from("galeria-clientes")
+      .getPublicUrl(caminho);
+
+    const { error: erroRegistro } = await db
+      .from("gallery_photos")
+      .insert({
+        image_url: urlData.publicUrl,
+        storage_path: caminho,
+        caption: legenda
+      });
+
+    if (erroRegistro) {
+      await db.storage.from("galeria-clientes").remove([caminho]);
+      avisar("A foto foi enviada, mas não foi publicada: " + erroRegistro.message);
+      return;
+    }
+
+    document.getElementById("formFoto").reset();
+    avisar("Foto publicada com sucesso!");
+    carregarFotos();
+  } catch (error) {
+    avisar("Erro ao publicar foto: " + error.message);
+    console.error(error);
+  } finally {
     botao.disabled = false;
-    return;
   }
-
-  const { data: urlData } = db.storage
-    .from("galeria-clientes")
-    .getPublicUrl(caminho);
-
-  const { error: erroRegistro } = await db
-    .from("gallery_photos")
-    .insert({
-      image_url: urlData.publicUrl,
-      storage_path: caminho,
-      caption: legenda
-    });
-
-  if (erroRegistro) {
-    await db.storage.from("galeria-clientes").remove([caminho]);
-    avisar("A foto foi enviada, mas não foi publicada: " + erroRegistro.message);
-    botao.disabled = false;
-    return;
-  }
-
-  document.getElementById("formFoto").reset();
-  avisar("Foto publicada com sucesso!");
-  botao.disabled = false;
-  carregarFotos();
 });
 
 async function carregarFotos() {
@@ -956,8 +1009,8 @@ async function carregarAvaliacoesPendentes() {
 
     const estrelas = document.createElement("div");
     estrelas.className = "avaliacao-estrelas";
-    estrelas.textContent =
-      "★".repeat(avaliacao.rating) + "☆".repeat(5 - avaliacao.rating);
+    const nota = Math.max(0, Math.min(5, Number(avaliacao.rating) || 0));
+    estrelas.textContent = "★".repeat(nota) + "☆".repeat(5 - nota);
 
     const comentario = document.createElement("p");
     comentario.className = "avaliacao-comentario";
@@ -1015,13 +1068,27 @@ async function alterarAvaliacao(id, status, botao) {
 
 /* INICIALIZAÇÃO */
 (async function iniciarPainel() {
-  const { data: { session } } = await db.auth.getSession();
+  if (!db) return;
 
-  if (session && await verificarAdmin()) {
-    carregarAgendamentos();
-    carregarFotos();
-    carregarServicos();
-    carregarAvaliacoesPendentes();
+  try {
+    const { data, error } = await db.auth.getSession();
+
+    if (error) {
+      erroLogin.textContent = "Erro ao verificar sessão: " + error.message;
+      return;
+    }
+
+    if (data.session) {
+      if (await verificarAdmin()) {
+        carregarDadosIniciais();
+      }
+    } else {
+      mostrarLogin();
+    }
+  } catch (error) {
+    console.error(error);
+    erroLogin.textContent = "Erro ao iniciar painel: " + error.message;
+    mostrarLogin();
   }
 })();
 </script>
