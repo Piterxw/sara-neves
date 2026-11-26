@@ -409,7 +409,6 @@ footer p {margin-top:12px;font-size:11px;letter-spacing:1px}
   </div>
 </section>
 
-<!-- GALERIA PÚBLICA -->
 <section class="gallery" id="galeria">
   <div class="kicker">NOSSO TRABALHO</div>
   <h2>Galeria de beleza</h2>
@@ -483,6 +482,68 @@ const SUPABASE_URL = "https://upgthlpcnnskasemvzso.supabase.co";
 const SUPABASE_KEY = "sb_publishable_o9oit1hipzi18_UjCpXWwg_WsRuG67p";
 
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* SISTEMA DE SONS */
+let contextoAudio = null;
+
+function tocarSom(tipo = "toque") {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    if (!contextoAudio) {
+      contextoAudio = new AudioContextClass();
+    }
+
+    if (contextoAudio.state === "suspended") {
+      contextoAudio.resume();
+    }
+
+    const agora = contextoAudio.currentTime;
+
+    function nota(frequencia, inicio, duracao, volumeMaximo) {
+      const oscilador = contextoAudio.createOscillator();
+      const volume = contextoAudio.createGain();
+
+      oscilador.type = "sine";
+      oscilador.frequency.setValueAtTime(frequencia, agora + inicio);
+
+      volume.gain.setValueAtTime(0.0001, agora + inicio);
+      volume.gain.exponentialRampToValueAtTime(
+        volumeMaximo,
+        agora + inicio + 0.02
+      );
+      volume.gain.exponentialRampToValueAtTime(
+        0.0001,
+        agora + inicio + duracao
+      );
+
+      oscilador.connect(volume);
+      volume.connect(contextoAudio.destination);
+
+      oscilador.start(agora + inicio);
+      oscilador.stop(agora + inicio + duracao + 0.03);
+    }
+
+    if (tipo === "confirmacao") {
+      nota(660, 0, 0.22, 0.10);
+      nota(880, 0.16, 0.30, 0.10);
+    } else {
+      nota(520, 0, 0.12, 0.045);
+    }
+  } catch (erro) {
+    console.warn("Som indisponível:", erro);
+  }
+}
+
+/* SOM SUAVE AO CLICAR NOS BOTÕES */
+document.addEventListener("click", event => {
+  const elemento = event.target.closest("button, .button");
+
+  if (elemento && !elemento.disabled) {
+    tocarSom("toque");
+  }
+});
 
 /* GALERIA: CARREGAR FOTOS PUBLICADAS PELO ADMIN */
 async function carregarGaleria() {
@@ -706,6 +767,9 @@ form.addEventListener("submit", async event => {
 
     mensagem.textContent = "Solicitação salva! Abrindo o WhatsApp...";
 
+    /* SOM DE CONFIRMAÇÃO */
+    tocarSom("confirmacao");
+
     const texto = [
       "Olá, Sara! Gostaria de solicitar um agendamento.",
       "",
@@ -739,5 +803,5 @@ form.addEventListener("submit", async event => {
 </script>
 
 </body>
-    </html>
+  </html>
   
