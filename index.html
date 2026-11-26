@@ -3,211 +3,198 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f7f0e8">
 <title>Sara Neves | Brow Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--cream:#f8f5f0;--beige:#e9dfd2;--brown:#594437;--gold:#b69a78;--text:#46382f}
+:root{--cream:#f8f4ee;--beige:#eee2d5;--champagne:#d8c1a5;--gold:#b99a76;--brown:#594437;--deep:#403027;--muted:#867568;--white:#fffdfa}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{background:var(--cream);color:var(--text);font-family:'DM Sans',sans-serif}
-header{min-height:82px;display:flex;justify-content:space-between;align-items:center;padding:12px 8%;background:rgba(248,245,240,.97);border-bottom:1px solid var(--beige)}
-.logo{font-family:'Playfair Display',serif;font-size:25px;letter-spacing:2px}
-.logo small{display:block;text-align:center;font-family:'DM Sans',sans-serif;font-size:9px;letter-spacing:5px;margin-top:3px}
-nav{display:flex;gap:18px;flex-wrap:wrap}
-nav a{color:var(--brown);text-decoration:none;font-size:11px;letter-spacing:1px}
-nav a:hover{color:var(--gold)}
-.hero{min-height:620px;display:flex;align-items:center;padding:70px 9%;background:linear-gradient(90deg,rgba(42,31,24,.68),rgba(42,31,24,.12)),url('https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=1800&q=85') center 38%/cover;color:white}
-.hero-content{max-width:520px}
-.eyebrow{font-size:11px;letter-spacing:4px;margin-bottom:24px}
-.hero h1{font-family:'Playfair Display',serif;font-size:clamp(45px,7vw,76px);font-weight:400;line-height:1.08;margin-bottom:24px}
-.hero p{font-size:15px;line-height:1.8;max-width:390px;color:#f2e9df}
-.button{display:inline-block;margin-top:32px;padding:17px 30px;background:#e8d8c4;color:#49372d;text-decoration:none;font-size:11px;letter-spacing:2px;text-transform:uppercase}
-.intro{padding:100px 20px 75px;text-align:center}
-.kicker{color:var(--gold);text-transform:uppercase;letter-spacing:4px;font-size:10px;margin-bottom:18px}
-h2{font-family:'Playfair Display',serif;font-size:clamp(32px,5vw,48px);font-weight:400}
-.intro p{max-width:520px;margin:20px auto 0;line-height:1.9;font-size:14px;color:#806f61}
-.services{padding:35px 8% 100px}
-.service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;max-width:1100px;margin:45px auto 0}
-.service-card{background:#fffdfa;border:1px solid var(--beige);padding:38px 25px;text-align:center}
-.service-number{color:var(--gold);font-family:'Playfair Display',serif;font-size:28px}
-.service-card h3{font-family:'Playfair Display',serif;font-size:23px;font-weight:400;margin:18px 0 12px}
-.service-card p{color:#8c7b6e;font-size:13px;line-height:1.7}
-.service-price{margin-top:18px;color:var(--brown);font-size:17px;font-weight:600}
-.gallery{padding:90px 8%;text-align:center;background:#fffdfa}
-.gallery-intro{max-width:520px;margin:18px auto 35px;color:#806f61;font-size:14px;line-height:1.8}
-.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:22px;max-width:1100px;margin:40px auto 0}
-.gallery-card{background:var(--cream);border:1px solid var(--beige);overflow:hidden;text-align:left}
-.gallery-card img{display:block;width:100%;height:280px;object-fit:cover;background:var(--beige)}
-.gallery-card p{padding:16px;color:var(--brown);font-size:13px;line-height:1.7}
-.gallery-empty{grid-column:1/-1;color:#806f61;padding:25px;font-size:14px}
-.booking{background:var(--beige);padding:95px 20px}
-.booking-wrap{max-width:650px;margin:auto;text-align:center}
-.booking-wrap>p{margin:15px auto 35px;color:#78675b;line-height:1.7;font-size:14px}
-form{background:#fffdfa;padding:35px;text-align:left;box-shadow:0 12px 35px #5944370d}
-label{display:block;margin:17px 0 8px;font-size:12px;letter-spacing:1px}
-input,select,textarea{width:100%;padding:15px;border:1px solid #e5d9cc;background:white;color:var(--text);font-family:inherit;font-size:14px;outline:none}
-input:focus,select:focus,textarea:focus{border-color:var(--gold)}
-textarea{min-height:120px;resize:vertical}
-.submit{width:100%;margin-top:28px;padding:18px;background:var(--brown);color:white;border:none;font-family:inherit;letter-spacing:2px;font-size:11px;cursor:pointer;text-transform:uppercase}
-.submit:disabled{opacity:.6;cursor:not-allowed}
-.notice{margin-top:18px;color:#88786c;font-size:11px;line-height:1.7}
-#precoSelecionado{margin-top:12px;color:var(--brown);font-size:14px;font-weight:600}
-#mensagem{margin-top:18px;font-size:13px;text-align:center;line-height:1.6}
-.pix-box{display:none;margin-top:22px;padding:22px;background:#f8f5f0;border:1px solid var(--beige);text-align:center}
-.pix-box h3{font-family:'Playfair Display',serif;font-size:24px;font-weight:400;margin-bottom:12px}
-.pix-key{font-weight:600;font-size:17px;overflow-wrap:anywhere;margin:12px 0;color:var(--brown)}
-.pix-button{width:100%;padding:15px;border:0;background:var(--gold);color:white;font-family:inherit;font-size:12px;letter-spacing:1px;cursor:pointer;margin-top:10px}
-.pix-help{font-size:12px;line-height:1.7;color:#806f61;margin-top:12px}
-.contact{text-align:center;padding:85px 20px}
-.contact p{margin-top:15px;color:#806f61;font-size:14px}
+body{background:var(--cream);color:var(--deep);font-family:'DM Sans',sans-serif}
+button,input,select,textarea{font:inherit}
+button,a{-webkit-tap-highlight-color:transparent}
+.site-header{height:78px;padding:12px 7%;display:flex;align-items:center;justify-content:space-between;background:rgba(248,244,238,.96);border-bottom:1px solid #e8dbcd;position:sticky;top:0;z-index:20;backdrop-filter:blur(12px)}
+.logo{font-family:'Playfair Display',serif;font-size:23px;letter-spacing:2px;color:var(--brown);text-align:center}
+.logo small{display:block;font:9px 'DM Sans',sans-serif;letter-spacing:5px;margin-top:3px}
+.header-link{color:var(--brown);text-decoration:none;font-size:11px;letter-spacing:1.4px;text-transform:uppercase}
+.view{display:none;min-height:calc(100vh - 78px);animation:appear .35s ease}
+.view.active{display:block}
+@keyframes appear{from{opacity:.4;transform:translateY(7px)}to{opacity:1;transform:none}}
+.hero{min-height:650px;display:flex;align-items:center;padding:70px 9%;color:white;background:linear-gradient(90deg,rgba(45,32,24,.72),rgba(45,32,24,.16)),url('https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=1800&q=85') center 38%/cover}
+.hero-content{max-width:570px}
+.eyebrow,.kicker{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:18px}
+.hero .eyebrow{color:#f0dfcc}
+h1,h2,h3{font-family:'Playfair Display',serif;font-weight:400}
+.hero h1{font-size:clamp(44px,7vw,76px);line-height:1.08;margin-bottom:22px}
+.hero p{max-width:430px;color:#f3e9df;line-height:1.9;font-size:14px}
+.primary-btn,.secondary-btn,.submit,.pix-button{border:0;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:9px;border-radius:999px;transition:.2s ease}
+.primary-btn{margin-top:30px;padding:16px 27px;background:linear-gradient(135deg,#ead9c5,#c9ad8d);color:#49372d;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;box-shadow:0 9px 22px #24170f2b}
+.primary-btn:hover,.submit:hover{transform:translateY(-2px);filter:brightness(1.03)}
+.secondary-btn{padding:13px 22px;border:1px solid var(--champagne);color:var(--brown);background:transparent;font-size:11px;letter-spacing:1px;text-transform:uppercase}
+.intro{text-align:center;padding:85px 22px 55px}
+.intro h2,.page-heading h1{font-size:clamp(34px,5vw,50px);color:var(--brown)}
+.intro p,.page-heading p{max-width:600px;margin:17px auto 0;color:var(--muted);font-size:14px;line-height:1.9}
+.home-tiles{max-width:1050px;margin:10px auto 90px;padding:0 22px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.tile{min-height:220px;border:1px solid #e7d9ca;background:var(--white);padding:28px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.tile span{font-size:25px;color:var(--gold);margin-bottom:12px}
+.tile h3{font-size:25px;color:var(--brown);margin-bottom:10px}
+.tile p{font-size:12px;color:var(--muted);line-height:1.7}
+.page-heading{text-align:center;padding:65px 20px 25px}
+.content-wrap{max-width:1100px;margin:0 auto;padding:15px 24px 90px}
+.service-grid,.gallery-grid,.reviews-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.service-card{background:var(--white);border:1px solid #e8dbcd;padding:34px 25px;text-align:center;box-shadow:0 10px 30px #5944370a}
+.service-number{font:28px 'Playfair Display',serif;color:var(--gold)}
+.service-card h3{font-size:23px;color:var(--brown);margin:14px 0 10px}
+.service-card p,.gallery-card p,.review-card p{font-size:13px;color:var(--muted);line-height:1.8}
+.service-price{font-size:18px;font-weight:700;color:var(--brown);margin-top:15px}
+.gallery-card,.review-card{background:var(--white);border:1px solid #e8dbcd;overflow:hidden}
+.gallery-card img{width:100%;height:280px;object-fit:cover;display:block;background:var(--beige)}
+.gallery-card p{padding:14px 17px}
+.review-card{padding:25px}
+.review-card .stars{color:var(--gold);letter-spacing:3px}
+.review-card h3{font-size:21px;color:var(--brown);margin:12px 0 8px}
+.empty{grid-column:1/-1;text-align:center;padding:35px 15px;color:var(--muted);font-size:14px;background:#fffdfa;border:1px dashed #d8c1a5}
+.form-panel{max-width:680px;margin:15px auto 85px;padding:clamp(22px,5vw,42px);background:var(--white);border:1px solid #e8dbcd;box-shadow:0 18px 50px #59443712;border-radius:22px}
+.form-panel label{display:block;margin:19px 0 8px;font-size:10px;letter-spacing:1.5px;font-weight:700;color:var(--brown)}
+.form-panel input,.form-panel select,.form-panel textarea{width:100%;padding:15px 16px;border:1px solid #e4d7c9;border-radius:12px;background:#fff;color:var(--deep);outline:none}
+.form-panel input:focus,.form-panel select:focus,.form-panel textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px #b99a761c}
+.form-panel textarea{min-height:110px;resize:vertical}
+#precoSelecionado{margin-top:11px;color:var(--brown);font-weight:700;font-size:14px}
+.submit{width:100%;margin-top:25px;padding:17px 22px;background:linear-gradient(135deg,#735844,#4d392d);color:#fff;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;box-shadow:0 9px 20px #59443725}
+.submit:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.notice{margin-top:15px;color:var(--muted);font-size:11px;line-height:1.8;text-align:center}
+#mensagem,#mensagemAvaliacao{margin-top:15px;text-align:center;font-size:13px;line-height:1.6;color:var(--brown)}
+.review-stars{display:flex;gap:8px;margin:8px 0}
+.review-star{border:0;background:#f5eee6;color:#c9bba9;font-size:30px;width:43px;height:43px;border-radius:50%;cursor:pointer}
+.review-star.selected{background:#ead9c5;color:#9b754e}
+.pix-box{display:none;margin-top:22px;padding:22px;background:#f8f4ee;border:1px solid #e8dbcd;border-radius:16px;text-align:center}
+.pix-box h3{font-size:25px;color:var(--brown);margin-bottom:12px}
+.pix-key{font-weight:700;font-size:16px;overflow-wrap:anywhere;margin:10px 0;color:var(--brown)}
+.pix-button{width:100%;padding:14px;background:var(--champagne);color:var(--deep);font-size:11px;font-weight:700;letter-spacing:1px;margin-top:12px}
+.pix-help{font-size:12px;line-height:1.8;color:var(--muted);margin-top:12px}
+.contact{text-align:center;padding:70px 20px 85px;background:#f0e5d9}
+.contact h2{font-size:35px;color:var(--brown)}
+.contact p{margin:13px 0;color:var(--muted);font-size:14px}
+.floating-nav{position:fixed;right:14px;top:50%;transform:translateY(-50%);z-index:30;display:flex;flex-direction:column;gap:11px}
+.float-link{width:46px;height:46px;border-radius:50%;background:#6a5140;color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;border:1px solid #d9c2a7;box-shadow:0 5px 16px #3b291d30;font-size:17px;transition:.2s}
+.float-link:hover,.float-link.active{background:#c5a783;color:#33251c;transform:scale(1.08)}
+.float-link span{position:absolute;right:55px;background:#49372d;color:#fff;padding:7px 10px;border-radius:7px;font-size:10px;white-space:nowrap;opacity:0;pointer-events:none;transition:.2s}
+.float-link:hover span{opacity:1}
 footer{padding:35px 20px;background:#49382e;color:#eee3d7;text-align:center}
-footer .logo{font-size:23px}
-footer p{margin-top:12px;font-size:11px;letter-spacing:1px}
-.admin-link{display:inline-block;margin-top:15px;color:#eee3d7;font-size:11px;text-decoration:underline}
-/* AVALIAÇÕES */
-.reviews{padding:90px 8%;text-align:center;background:var(--cream)}
-.reviews-intro{max-width:560px;margin:18px auto 35px;color:#806f61;font-size:14px;line-height:1.8}
-.review-form{max-width:650px;margin:35px auto 0;background:#fffdfa;padding:32px;text-align:left;border:1px solid var(--beige);box-shadow:0 12px 35px #5944370d}
-.review-form label{margin-top:16px}
-.review-form textarea{min-height:115px}
-.review-stars{display:flex;gap:8px;margin:8px 0 4px}
-.review-star{border:0;background:transparent;color:#c9bba9;font-size:32px;line-height:1;cursor:pointer;padding:2px}
-.review-star.selected{color:#b69a78}
-.review-status{min-height:22px;margin-top:16px;text-align:center;font-size:13px;line-height:1.6}
-.reviews-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;max-width:1100px;margin:42px auto 0;text-align:left}
-.review-card{background:#fffdfa;border:1px solid var(--beige);padding:25px}
-.review-card .stars{color:var(--gold);letter-spacing:3px;font-size:17px}
-.review-card h3{font-family:'Playfair Display',serif;font-size:20px;font-weight:400;margin:12px 0 8px}
-.review-card p{font-size:13px;color:#806f61;line-height:1.8;overflow-wrap:anywhere}
+footer .logo{color:#eee3d7}
+footer p{margin-top:10px;font-size:10px;letter-spacing:1px}
+footer a{display:inline-block;margin-top:13px;color:#eee3d7;font-size:11px}
 @media(max-width:700px){
-header{padding:12px 5%;gap:12px;flex-wrap:wrap}
-nav{gap:12px}
-nav a{font-size:10px}
-.hero{min-height:550px;padding:55px 8%;background-position:58% center}
-.service-grid{grid-template-columns:1fr}
-.services{padding-left:7%;padding-right:7%}
-.gallery{padding:65px 7%}
-.gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.gallery-card img{height:190px}
-form,.review-form{padding:24px 19px}
-.reviews{padding:65px 7%}
+.site-header{height:70px;padding:10px 5%}.logo{font-size:20px}.hero{min-height:570px;padding:55px 8%;background-position:58% center}
+.home-tiles{grid-template-columns:1fr;margin-bottom:65px}.tile{min-height:160px}
+.content-wrap{padding-left:17px;padding-right:17px}.gallery-card img{height:210px}
+.floating-nav{right:8px;gap:9px}.float-link{width:41px;height:41px;font-size:15px}
+.view{min-height:calc(100vh - 70px)}
 }
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<header>
-<div class="logo">SARA NEVES<small>BROW STUDIO</small></div>
-<nav>
-<a href="#servicos">SERVIÇOS</a>
-<a href="#galeria">GALERIA</a>
-<a href="#avaliacoes">AVALIAÇÕES</a>
-<a href="#agendar">AGENDAR</a>
-<a href="admin.html">ÁREA ADM</a>
-</nav>
+<header class="site-header">
+  <a href="#" class="header-link" data-view="home" aria-label="Voltar ao início">INÍCIO</a>
+  <div class="logo">SARA NEVES<small>BROW STUDIO</small></div>
+  <a href="admin.html" class="header-link">ADM</a>
 </header>
 
-<section class="hero">
-<div class="hero-content">
-<div class="eyebrow">BELEZA • DELICADEZA • AUTENTICIDADE</div>
-<h1>Realce a beleza que já existe em você.</h1>
-<p>Um cuidado especial para valorizar sua beleza natural. Descubra a experiência Sara Neves Brow Studio.</p>
-<a href="#agendar" class="button">Agendar meu horário</a>
-</div>
+<nav class="floating-nav" aria-label="Navegação principal">
+  <a class="float-link active" href="#inicio" data-view="home" aria-label="Início">⌂<span>Início</span></a>
+  <a class="float-link" href="#servicos" data-view="services" aria-label="Serviços">✧<span>Serviços</span></a>
+  <a class="float-link" href="#galeria" data-view="gallery" aria-label="Galeria">▧<span>Galeria</span></a>
+  <a class="float-link" href="#avaliacoes" data-view="reviews" aria-label="Avaliações">★<span>Avaliações</span></a>
+  <a class="float-link" href="#agendar" data-view="booking" aria-label="Agendar">♡<span>Agendar</span></a>
+  <a class="float-link" href="admin.html" aria-label="Área administrativa">♙<span>ADM</span></a>
+</nav>
+
+<main>
+<section class="view active" id="view-home">
+  <div class="hero" id="inicio">
+    <div class="hero-content">
+      <div class="eyebrow">BELEZA · DELICADEZA · AUTENTICIDADE</div>
+      <h1>Realce a beleza que já existe em você.</h1>
+      <p>Um cuidado especial para valorizar sua beleza natural. Descubra a experiência Sara Neves Brow Studio.</p>
+      <button class="primary-btn" type="button" data-open="booking">Agendar meu horário</button>
+    </div>
+  </div>
+  <div class="intro">
+    <div class="kicker">SARA NEVES BROW STUDIO</div>
+    <h2>Um detalhe faz toda a diferença.</h2>
+    <p>Cada sobrancelha tem sua própria beleza. Nosso objetivo é valorizar seus traços com cuidado, atenção e delicadeza.</p>
+  </div>
+  <div class="home-tiles">
+    <article class="tile"><span>✧</span><h3>Nossos serviços</h3><p>Conheça os cuidados e procedimentos disponíveis.</p><button class="secondary-btn" data-open="services">Conhecer</button></article>
+    <article class="tile"><span>▧</span><h3>Galeria de beleza</h3><p>Veja alguns trabalhos e resultados do estúdio.</p><button class="secondary-btn" data-open="gallery">Ver galeria</button></article>
+    <article class="tile"><span>★</span><h3>Experiências reais</h3><p>Leia avaliações e compartilhe sua experiência.</p><button class="secondary-btn" data-open="reviews">Ver avaliações</button></article>
+  </div>
+  <section class="contact">
+    <div class="kicker">VAMOS CONVERSAR?</div><h2>Seu próximo cuidado começa aqui.</h2>
+    <p>Entre em contato pelo nosso WhatsApp.</p>
+    <a class="primary-btn" href="https://wa.me/5528999115294" target="_blank" rel="noopener">Conversar pelo WhatsApp</a>
+  </section>
 </section>
 
-<section class="intro">
-<div class="kicker">SARA NEVES BROW STUDIO</div>
-<h2>Um detalhe faz toda a diferença.</h2>
-<p>Cada sobrancelha tem sua própria beleza. Nosso objetivo é valorizar seus traços com cuidado, atenção e delicadeza.</p>
+<section class="view" id="view-services">
+  <div class="page-heading"><div class="kicker">NOSSOS CUIDADOS</div><h1>Serviços</h1><p>Escolha o cuidado ideal para valorizar sua beleza natural.</p></div>
+  <div class="content-wrap"><div id="cardsServicos" class="service-grid"><p class="empty">Carregando serviços...</p></div></div>
 </section>
 
-<section class="services" id="servicos">
-<div style="text-align:center"><div class="kicker">NOSSOS CUIDADOS</div><h2>Serviços</h2></div>
-<div id="cardsServicos" class="service-grid"><p class="gallery-empty">Carregando serviços...</p></div>
+<section class="view" id="view-gallery">
+  <div class="page-heading"><div class="kicker">NOSSO TRABALHO</div><h1>Galeria de beleza</h1><p>Alguns resultados dos nossos cuidados, feitos com carinho e delicadeza.</p></div>
+  <div class="content-wrap"><div id="galeriaFotos" class="gallery-grid"><p class="empty">Carregando fotos...</p></div></div>
 </section>
 
-<section class="gallery" id="galeria">
-<div class="kicker">NOSSO TRABALHO</div>
-<h2>Galeria de beleza</h2>
-<p class="gallery-intro">Alguns resultados dos nossos cuidados, feitos com carinho e delicadeza.</p>
-<div id="galeriaFotos" class="gallery-grid"><p class="gallery-empty">Carregando fotos...</p></div>
+<section class="view" id="view-reviews">
+  <div class="page-heading"><div class="kicker">A EXPERIÊNCIA DE QUEM CONFIA</div><h1>Avaliações</h1><p>Veja o que nossas clientes compartilharam e conte como foi sua experiência.</p></div>
+  <div class="content-wrap"><div id="avaliacoesPublicadas" class="reviews-list"><p class="empty">Carregando avaliações...</p></div>
+    <form id="formAvaliacao" class="form-panel">
+      <div class="kicker">SUA OPINIÃO É IMPORTANTE</div><h2 style="font-size:30px;color:var(--brown)">Deixe sua avaliação</h2>
+      <label for="nomeAvaliacao">SEU NOME</label><input id="nomeAvaliacao" type="text" maxlength="80" placeholder="Como podemos te chamar?" required>
+      <label>SUA NOTA</label>
+      <div class="review-stars" id="seletorEstrelas" role="group" aria-label="Escolha uma nota de 1 a 5">
+        <button class="review-star" type="button" data-rating="1" aria-label="1 estrela">☆</button><button class="review-star" type="button" data-rating="2" aria-label="2 estrelas">☆</button><button class="review-star" type="button" data-rating="3" aria-label="3 estrelas">☆</button><button class="review-star" type="button" data-rating="4" aria-label="4 estrelas">☆</button><button class="review-star" type="button" data-rating="5" aria-label="5 estrelas">☆</button>
+      </div>
+      <label for="comentarioAvaliacao">SEU COMENTÁRIO</label><textarea id="comentarioAvaliacao" maxlength="600" placeholder="Conte um pouquinho sobre sua experiência..." required></textarea>
+      <button class="submit" id="botaoAvaliacao" type="submit">Enviar avaliação</button>
+      <p class="notice">Sua avaliação será enviada para análise e só aparecerá no site depois da aprovação da responsável.</p>
+      <p id="mensagemAvaliacao" role="status" aria-live="polite"></p>
+    </form>
+  </div>
 </section>
 
-<section class="reviews" id="avaliacoes">
-<div class="kicker">A EXPERIÊNCIA DE QUEM CONFIA</div>
-<h2>Avaliações</h2>
-<p class="reviews-intro">Veja o que nossas clientes compartilharam e conte como foi sua experiência no Sara Neves Brow Studio.</p>
-<div id="avaliacoesPublicadas" class="reviews-list"><p class="gallery-empty">Carregando avaliações...</p></div>
-<form id="formAvaliacao" class="review-form">
-<div class="kicker">SUA OPINIÃO É IMPORTANTE</div>
-<h2 style="font-size:30px">Deixe sua avaliação</h2>
-<label for="nomeAvaliacao">SEU NOME</label>
-<input id="nomeAvaliacao" type="text" maxlength="80" placeholder="Como podemos te chamar?" required>
-<label>SUA NOTA</label>
-<div class="review-stars" id="seletorEstrelas" role="group" aria-label="Escolha uma nota de 1 a 5">
-<button class="review-star" type="button" data-rating="1" aria-label="1 estrela" aria-pressed="false">★</button>
-<button class="review-star" type="button" data-rating="2" aria-label="2 estrelas" aria-pressed="false">★</button>
-<button class="review-star" type="button" data-rating="3" aria-label="3 estrelas" aria-pressed="false">★</button>
-<button class="review-star" type="button" data-rating="4" aria-label="4 estrelas" aria-pressed="false">★</button>
-<button class="review-star" type="button" data-rating="5" aria-label="5 estrelas" aria-pressed="false">★</button>
-</div>
-<label for="comentarioAvaliacao">SEU COMENTÁRIO</label>
-<textarea id="comentarioAvaliacao" maxlength="600" placeholder="Conte um pouquinho sobre sua experiência..." required></textarea>
-<button class="submit" id="botaoAvaliacao" type="submit">ENVIAR AVALIAÇÃO</button>
-<p class="notice">Sua avaliação será enviada para análise e só aparecerá no site depois da aprovação da responsável.</p>
-<p class="review-status" id="mensagemAvaliacao" role="status" aria-live="polite"></p>
-</form>
+<section class="view" id="view-booking">
+  <div class="page-heading"><div class="kicker">RESERVE SEU MOMENTO</div><h1>Agende seu horário</h1><p>Escolha seu serviço, a data e um horário disponível. A confirmação será feita pelo WhatsApp.</p></div>
+  <form id="formAgendamento" class="form-panel">
+    <label for="nome">NOME COMPLETO</label><input id="nome" type="text" maxlength="100" placeholder="Como podemos te chamar?" required>
+    <label for="telefone">WHATSAPP</label><input id="telefone" type="tel" maxlength="20" placeholder="Seu número com DDD" required>
+    <label for="servico">SERVIÇO DESEJADO</label><select id="servico" required><option value="">Carregando serviços...</option></select>
+    <p id="precoSelecionado">Selecione um serviço para ver o preço.</p>
+    <label for="data">DATA DESEJADA</label><input id="data" type="date" required>
+    <label for="horario">HORÁRIO DISPONÍVEL</label><select id="horario" required disabled><option value="">Primeiro escolha a data</option></select>
+    <button class="submit" id="botaoEnviar" type="submit">Solicitar agendamento</button>
+    <p class="notice">Cada atendimento dura aproximadamente 40 minutos. O envio representa uma solicitação, não uma confirmação automática. Aguarde o retorno pelo WhatsApp.</p>
+    <p id="mensagem" role="status" aria-live="polite"></p>
+    <div class="pix-box" id="pixBox">
+      <h3>Pagamento via Pix</h3><p>Valor do serviço:</p><div class="pix-key" id="pixValor"></div>
+      <p>Chave Pix da Sara:</p><div class="pix-key" id="pixChave">+55 28 99911-5294</div>
+      <button class="pix-button" type="button" id="copiarPix">Copiar chave Pix</button>
+      <p class="pix-help">Após realizar o Pix, envie o comprovante pelo WhatsApp. O agendamento só será confirmado depois que a responsável verificar o pagamento e confirmar o horário.</p>
+      <a class="primary-btn" id="enviarComprovante" href="https://wa.me/5528999115294" target="_blank" rel="noopener">Enviar comprovante pelo WhatsApp</a>
+    </div>
+  </form>
 </section>
-
-<section class="booking" id="agendar">
-<div class="booking-wrap">
-<div class="kicker">RESERVE SEU MOMENTO</div>
-<h2>Agende seu horário</h2>
-<p>Escolha uma data e veja os horários disponíveis. A confirmação será feita pelo WhatsApp.</p>
-<form id="formAgendamento">
-<label for="nome">NOME COMPLETO</label>
-<input id="nome" type="text" maxlength="100" placeholder="Como podemos te chamar?" required>
-<label for="telefone">WHATSAPP</label>
-<input id="telefone" type="tel" maxlength="20" placeholder="Seu número com DDD" required>
-<label for="servico">SERVIÇO DESEJADO</label>
-<select id="servico" required><option value="">Carregando serviços...</option></select>
-<p id="precoSelecionado">Selecione um serviço para ver o preço.</p>
-<label for="data">DATA DESEJADA</label>
-<input id="data" type="date" required>
-<label for="horario">HORÁRIO DISPONÍVEL</label>
-<select id="horario" required disabled><option value="">Primeiro escolha a data</option></select>
-<button class="submit" id="botaoEnviar" type="submit">Solicitar agendamento</button>
-<p class="notice">Cada atendimento dura aproximadamente 40 minutos. O envio representa uma solicitação, não uma confirmação automática. Aguarde o retorno pelo WhatsApp.</p>
-<p id="mensagem" role="status"></p>
-<div class="pix-box" id="pixBox">
-<h3>Pagamento via Pix</h3>
-<p>Valor do serviço:</p>
-<div class="pix-key" id="pixValor"></div>
-<p>Chave Pix da Sara:</p>
-<div class="pix-key" id="pixChave">+55 28 99911-5294</div>
-<button class="pix-button" type="button" id="copiarPix">COPIAR CHAVE PIX</button>
-<p class="pix-help">Após realizar o Pix, envie o comprovante pelo WhatsApp. O agendamento só será confirmado depois que a responsável verificar o pagamento e confirmar o horário.</p>
-<a class="button" id="enviarComprovante" href="https://wa.me/5528999115294" target="_blank" rel="noopener">Enviar comprovante pelo WhatsApp</a>
-</div>
-</form>
-</div>
-</section>
-
-<section class="contact">
-<div class="kicker">VAMOS CONVERSAR?</div>
-<h2>Seu próximo cuidado começa aqui.</h2>
-<p>Entre em contato pelo nosso WhatsApp.</p>
-<a class="button" href="https://wa.me/5528999115294" target="_blank" rel="noopener">Conversar pelo WhatsApp</a>
-</section>
+</main>
 
 <footer>
-<div class="logo">SARA NEVES</div>
-<p>BROW STUDIO · BELEZA EM CADA DETALHE</p>
-<p>© 2026 Sara Neves. Todos os direitos reservados.</p>
-<a class="admin-link" href="admin.html">Acesso administrativo</a>
+  <div class="logo">SARA NEVES<small>BROW STUDIO</small></div>
+  <p>BELEZA EM CADA DETALHE · © 2026 SARA NEVES</p>
+  <a href="admin.html">Acesso administrativo</a>
 </footer>
 
 <script>
@@ -216,416 +203,397 @@ const SUPABASE_KEY = "sb_publishable_o9oit1hipzi18_UjCpXWwg_WsRuG67p";
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const CHAVE_PIX = "+5528999115294";
 const WHATSAPP_SARA = "5528999115294";
+const DURACAO = 40;
 
-/* SONS */
-let contextoAudio = null;
-function tocarSom(tipo = "toque") {
-  try {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextClass) return;
-    if (!contextoAudio) contextoAudio = new AudioContextClass();
-    if (contextoAudio.state === "suspended") contextoAudio.resume();
-    const agora = contextoAudio.currentTime;
-    function nota(frequencia, inicio, duracao, volumeMaximo) {
-      const oscilador = contextoAudio.createOscillator();
-      const volume = contextoAudio.createGain();
-      oscilador.type = "sine";
-      oscilador.frequency.setValueAtTime(frequencia, agora + inicio);
-      volume.gain.setValueAtTime(0.0001, agora + inicio);
-      volume.gain.exponentialRampToValueAtTime(volumeMaximo, agora + inicio + 0.02);
-      volume.gain.exponentialRampToValueAtTime(0.0001, agora + inicio + duracao);
-      oscilador.connect(volume);
-      volume.connect(contextoAudio.destination);
-      oscilador.start(agora + inicio);
-      oscilador.stop(agora + inicio + duracao + 0.03);
-    }
-    if (tipo === "confirmacao") {
-      nota(660, 0, 0.22, 0.10);
-      nota(880, 0.16, 0.30, 0.10);
-    } else {
-      nota(520, 0, 0.12, 0.045);
-    }
-  } catch (erro) {
-    console.warn("Som indisponível:", erro);
-  }
+function abrirView(nome) {
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  const destino = document.getElementById("view-" + nome);
+  if (!destino) return;
+  destino.classList.add("active");
+  document.querySelectorAll(".float-link[data-view]").forEach(link => {
+    link.classList.toggle("active", link.dataset.view === nome);
+  });
+  window.scrollTo({top:0,behavior:"smooth"});
+  history.replaceState(null,"","#" + nome);
 }
-document.addEventListener("click", event => {
-  const elemento = event.target.closest("button, .button");
-  if (elemento && !elemento.disabled) tocarSom("toque");
-});
+document.querySelectorAll("[data-view]").forEach(link => link.addEventListener("click",e=>{
+  e.preventDefault(); abrirView(link.dataset.view);
+}));
+document.querySelectorAll("[data-open]").forEach(button=>button.addEventListener("click",()=>abrirView(button.dataset.open)));
 
-function formatarMoeda(valor) {
-  return Number(valor).toLocaleString("pt-BR", {style:"currency",currency:"BRL"});
+let contextoAudio=null;
+function tocarSom(tipo="toque"){
+  try{
+    const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+    if(!AudioContextClass)return;
+    if(!contextoAudio)contextoAudio=new AudioContextClass();
+    if(contextoAudio.state==="suspended")contextoAudio.resume();
+    const agora=contextoAudio.currentTime;
+    const osc=contextoAudio.createOscillator(),gain=contextoAudio.createGain();
+    osc.type="sine";osc.frequency.setValueAtTime(tipo==="confirmacao"?760:520,agora);
+    gain.gain.setValueAtTime(.0001,agora);gain.gain.exponentialRampToValueAtTime(.045,agora+.02);gain.gain.exponentialRampToValueAtTime(.0001,agora+.18);
+    osc.connect(gain);gain.connect(contextoAudio.destination);osc.start();osc.stop(agora+.2);
+  }catch(e){console.warn("Som indisponível",e);}
 }
+document.addEventListener("click",e=>{if(e.target.closest("button,.primary-btn,.secondary-btn"))tocarSom();});
+function formatarMoeda(valor){return Number(valor).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});}
 
 /* SERVIÇOS */
-let servicosAtivos = [];
-async function carregarServicosPublicos() {
-  const seletor = document.getElementById("servico");
-  const cards = document.getElementById("cardsServicos");
-  const precoSelecionado = document.getElementById("precoSelecionado");
-  seletor.innerHTML = '<option value="">Carregando serviços...</option>';
-  cards.replaceChildren();
-  try {
-    const {data,error} = await db.from("services")
-      .select("id,name,price,active").eq("active",true).order("created_at",{ascending:true});
-    if (error) throw error;
-    servicosAtivos = (data || []).filter(item => Number.isFinite(Number(item.price)) && Number(item.price) > 0);
-    seletor.innerHTML = '<option value="">Selecione um serviço</option>';
-    if (!servicosAtivos.length) {
-      seletor.innerHTML = '<option value="">Serviços indisponíveis</option>';
-      const aviso = document.createElement("p");
-      aviso.className = "gallery-empty";
-      aviso.textContent = "Os serviços estarão disponíveis assim que seus preços forem cadastrados no painel administrativo.";
-      cards.appendChild(aviso);
-      precoSelecionado.textContent = "Consulte os valores pelo WhatsApp.";
-      return;
+let servicosAtivos=[];
+async function carregarServicosPublicos(){
+  const seletor=document.getElementById("servico");
+  const cards=document.getElementById("cardsServicos");
+  const preco=document.getElementById("precoSelecionado");
+  try{
+    const {data,error}=await db.from("services").select("id,name,price,active").eq("active",true).order("created_at",{ascending:true});
+    if(error)throw error;
+    servicosAtivos=(data||[]).filter(item=>Number.isFinite(Number(item.price))&&Number(item.price)>0);
+    seletor.innerHTML='<option value="">Selecione um serviço</option>';cards.replaceChildren();
+    if(!servicosAtivos.length){
+      seletor.innerHTML='<option value="">Serviços indisponíveis</option>';
+      cards.innerHTML='<p class="empty">Os serviços estarão disponíveis assim que seus preços forem cadastrados no painel administrativo.</p>';
+      preco.textContent="Consulte os valores pelo WhatsApp.";return;
     }
-    servicosAtivos.forEach((item,index) => {
-      const option = document.createElement("option");
-      option.value = item.id;
-      option.textContent = `${item.name} — ${formatarMoeda(item.price)}`;
-      seletor.appendChild(option);
-      const card = document.createElement("article");
-      card.className = "service-card";
-      const numero = document.createElement("div");
-      numero.className = "service-number";
-      numero.textContent = String(index+1).padStart(2,"0");
-      const titulo = document.createElement("h3");
-      titulo.textContent = item.name;
-      const descricao = document.createElement("p");
-      descricao.textContent = "Um cuidado especial para valorizar sua beleza natural.";
-      const preco = document.createElement("div");
-      preco.className = "service-price";
-      preco.textContent = formatarMoeda(item.price);
-      card.append(numero,titulo,descricao,preco);
-      cards.appendChild(card);
+    servicosAtivos.forEach((item,index)=>{
+      const option=document.createElement("option");option.value=item.id;option.textContent=`${item.name} — ${formatarMoeda(item.price)}`;seletor.appendChild(option);
+      const card=document.createElement("article");card.className="service-card";
+      const numero=document.createElement("div");numero.className="service-number";numero.textContent=String(index+1).padStart(2,"0");
+      const titulo=document.createElement("h3");titulo.textContent=item.name;
+      const descricao=document.createElement("p");descricao.textContent="Um cuidado especial para valorizar sua beleza natural.";
+      const valor=document.createElement("div");valor.className="service-price";valor.textContent=formatarMoeda(item.price);
+      card.append(numero,titulo,descricao,valor);cards.appendChild(card);
     });
-  } catch(error) {
+  }catch(error){
     console.error("Erro ao carregar serviços:",error);
-    seletor.innerHTML = '<option value="">Erro ao carregar serviços</option>';
-    const aviso = document.createElement("p");
-    aviso.className = "gallery-empty";
-    aviso.textContent = "Não foi possível carregar os serviços. Tente novamente mais tarde.";
-    cards.appendChild(aviso);
-    precoSelecionado.textContent = "Não foi possível consultar os preços.";
+    seletor.innerHTML='<option value="">Erro ao carregar serviços</option>';
+    cards.innerHTML='<p class="empty">Não foi possível carregar os serviços. Tente novamente mais tarde.</p>';
+    preco.textContent="Não foi possível consultar os preços.";
   }
 }
-document.getElementById("servico").addEventListener("change",() => {
-  const id = document.getElementById("servico").value;
-  const item = servicosAtivos.find(servico => servico.id === id);
-  document.getElementById("precoSelecionado").textContent = item
+
+document.getElementById("servico").addEventListener("change",()=>{
+  const item=servicosAtivos.find(s=>s.id===document.getElementById("servico").value);
+  document.getElementById("precoSelecionado").textContent=item
     ? `Valor do serviço: ${formatarMoeda(item.price)}`
     : "Selecione um serviço para ver o preço.";
 });
 
 /* GALERIA */
-async function carregarGaleria() {
-  const galeria = document.getElementById("galeriaFotos");
+async function carregarGaleria(){
+  const galeria=document.getElementById("galeriaFotos");
   galeria.replaceChildren();
-  try {
-    const {data,error} = await db.from("gallery_photos")
-      .select("id,image_url,caption,created_at").order("created_at",{ascending:false});
-    if (error) throw error;
-    if (!data || data.length === 0) {
-      const aviso = document.createElement("p");
-      aviso.className = "gallery-empty";
-      aviso.textContent = "Em breve, novidades por aqui. Estamos preparando nossa galeria!";
-      galeria.appendChild(aviso);
+
+  try{
+    const {data,error}=await db
+      .from("gallery_photos")
+      .select("id,image_url,caption,created_at")
+      .order("created_at",{ascending:false});
+
+    if(error)throw error;
+
+    if(!data||!data.length){
+      galeria.innerHTML='<p class="empty">Em breve, novidades por aqui. Estamos preparando nossa galeria!</p>';
       return;
     }
-    data.forEach(foto => {
-      const card = document.createElement("article");
-      card.className = "gallery-card";
-      const imagem = document.createElement("img");
-      imagem.src = foto.image_url;
-      imagem.alt = foto.caption || "Trabalho Sara Neves Brow Studio";
-      imagem.loading = "lazy";
-      const legenda = document.createElement("p");
-      legenda.textContent = foto.caption || "Sara Neves Brow Studio";
-      card.append(imagem,legenda);
+
+    data.forEach(foto=>{
+      const card=document.createElement("article");
+      card.className="gallery-card";
+
+      const img=document.createElement("img");
+      img.src=foto.image_url;
+      img.alt=foto.caption||"Trabalho Sara Neves Brow Studio";
+      img.loading="lazy";
+
+      const legenda=document.createElement("p");
+      legenda.textContent=foto.caption||"Sara Neves Brow Studio";
+
+      card.append(img,legenda);
       galeria.appendChild(card);
     });
-  } catch(error) {
-    const aviso = document.createElement("p");
-    aviso.className = "gallery-empty";
-    aviso.textContent = "Não foi possível carregar as fotos no momento.";
-    galeria.appendChild(aviso);
+  }catch(error){
     console.error("Erro na galeria:",error);
+    galeria.innerHTML='<p class="empty">Não foi possível carregar as fotos no momento.</p>';
   }
 }
 
 /* AVALIAÇÕES */
-let notaSelecionada = 0;
-const estrelas = document.querySelectorAll(".review-star");
-const formularioAvaliacao = document.getElementById("formAvaliacao");
-const mensagemAvaliacao = document.getElementById("mensagemAvaliacao");
+let notaSelecionada=0;
 
-estrelas.forEach(estrela => {
-  estrela.addEventListener("click",() => {
-    notaSelecionada = Number(estrela.dataset.rating);
-    estrelas.forEach(item => {
-      const nota = Number(item.dataset.rating);
-      item.textContent = nota <= notaSelecionada ? "★" : "☆";
-      item.classList.toggle("selected",nota <= notaSelecionada);
-      item.setAttribute("aria-pressed",nota === notaSelecionada ? "true" : "false");
-    });
+const estrelas=document.querySelectorAll(".review-star");
+const formularioAvaliacao=document.getElementById("formAvaliacao");
+const mensagemAvaliacao=document.getElementById("mensagemAvaliacao");
+
+estrelas.forEach(estrela=>estrela.addEventListener("click",()=>{
+  notaSelecionada=Number(estrela.dataset.rating);
+
+  estrelas.forEach(item=>{
+    const nota=Number(item.dataset.rating);
+    item.textContent=nota<=notaSelecionada?"★":"☆";
+    item.classList.toggle("selected",nota<=notaSelecionada);
+    item.setAttribute("aria-pressed",nota===notaSelecionada?"true":"false");
   });
-});
+}));
 
-async function carregarAvaliacoes() {
-  const lista = document.getElementById("avaliacoesPublicadas");
+async function carregarAvaliacoes(){
+  const lista=document.getElementById("avaliacoesPublicadas");
   lista.replaceChildren();
-  try {
-    
-const {data,error} = await db.from("reviews")
+
+  try{
+    const {data,error}=await db
+      .from("reviews")
       .select("id,customer_name,rating,comment,created_at")
       .eq("status","approved")
       .order("created_at",{ascending:false});
 
-    if (error) throw error;
+    if(error)throw error;
 
-    if (!data || data.length === 0) {
-      const aviso = document.createElement("p");
-      aviso.className = "gallery-empty";
-      aviso.textContent = "Ainda não temos avaliações publicadas. Seja a primeira pessoa a avaliar!";
-      lista.appendChild(aviso);
+    if(!data||!data.length){
+      lista.innerHTML='<p class="empty">Ainda não temos avaliações publicadas. Seja a primeira pessoa a avaliar!</p>';
       return;
     }
 
-    data.forEach(avaliacao => {
-      const card = document.createElement("article");
-      card.className = "review-card";
+    data.forEach(avaliacao=>{
+      const card=document.createElement("article");
+      card.className="review-card";
 
-      const nota = document.createElement("div");
-      nota.className = "stars";
-      nota.textContent = "★".repeat(avaliacao.rating) + "☆".repeat(5-avaliacao.rating);
+      const nota=document.createElement("div");
+      nota.className="stars";
+      nota.textContent="★".repeat(avaliacao.rating)+"☆".repeat(5-avaliacao.rating);
 
-      const nome = document.createElement("h3");
-      nome.textContent = avaliacao.customer_name;
+      const nome=document.createElement("h3");
+      nome.textContent=avaliacao.customer_name;
 
-      const comentario = document.createElement("p");
-      comentario.textContent = avaliacao.comment;
+      const comentario=document.createElement("p");
+      comentario.textContent=avaliacao.comment;
 
       card.append(nota,nome,comentario);
       lista.appendChild(card);
     });
-
-  } catch(error) {
+  }catch(error){
     console.error("Erro ao carregar avaliações:",error);
-    const aviso = document.createElement("p");
-    aviso.className = "gallery-empty";
-    aviso.textContent = "Não foi possível carregar as avaliações.";
-    lista.appendChild(aviso);
+    lista.innerHTML='<p class="empty">Não foi possível carregar as avaliações.</p>';
   }
 }
 
-/* ENVIAR AVALIAÇÃO */
-formularioAvaliacao.addEventListener("submit",async event => {
+formularioAvaliacao.addEventListener("submit",async event=>{
   event.preventDefault();
 
-  const nome = document.getElementById("nomeAvaliacao").value.trim();
-  const comentario = document.getElementById("comentarioAvaliacao").value.trim();
+  const nome=document.getElementById("nomeAvaliacao").value.trim();
+  const comentario=document.getElementById("comentarioAvaliacao").value.trim();
 
-  if (!nome || !comentario || notaSelecionada < 1 || notaSelecionada > 5) {
-    mensagemAvaliacao.textContent = "Preencha seu nome, escolha as estrelas e escreva seu comentário.";
+  if(!nome||!comentario||notaSelecionada<1||notaSelecionada>5){
+    mensagemAvaliacao.textContent="Preencha seu nome, escolha as estrelas e escreva seu comentário.";
     return;
   }
 
-  const botao = document.getElementById("botaoAvaliacao");
-  botao.disabled = true;
-  botao.textContent = "ENVIANDO...";
+  const botao=document.getElementById("botaoAvaliacao");
+  botao.disabled=true;
+  botao.textContent="ENVIANDO...";
 
-  try {
-    const {error} = await db.from("reviews").insert([{
+  try{
+    const {error}=await db.from("reviews").insert([{
       customer_name:nome,
       rating:notaSelecionada,
       comment:comentario,
       status:"pending"
     }]);
 
-    if (error) throw error;
+    if(error)throw error;
 
-    mensagemAvaliacao.textContent = "Avaliação enviada! Ela aparecerá no site depois da aprovação da Sara.";
+    mensagemAvaliacao.textContent="Avaliação enviada! Ela aparecerá no site depois da aprovação da Sara.";
 
     formularioAvaliacao.reset();
-    notaSelecionada = 0;
+    notaSelecionada=0;
 
-    estrelas.forEach(estrela => {
-      estrela.textContent = "★";
+    estrelas.forEach(estrela=>{
+      estrela.textContent="☆";
       estrela.classList.remove("selected");
       estrela.setAttribute("aria-pressed","false");
     });
 
-  } catch(error) {
+  }catch(error){
     console.error("Erro ao enviar avaliação:",error);
-    mensagemAvaliacao.textContent = "Não foi possível enviar sua avaliação. Tente novamente.";
-  } finally {
-    botao.disabled = false;
-    botao.textContent = "ENVIAR AVALIAÇÃO";
+    mensagemAvaliacao.textContent="Não foi possível enviar sua avaliação. Tente novamente.";
+  }finally{
+    botao.disabled=false;
+    botao.textContent="Enviar avaliação";
   }
 });
 
 /* HORÁRIOS E AGENDAMENTO */
-const form = document.getElementById("formAgendamento");
-const mensagem = document.getElementById("mensagem");
-const botao = document.getElementById("botaoEnviar");
-const campoData = document.getElementById("data");
-const campoHorario = document.getElementById("horario");
-const pixBox = document.getElementById("pixBox");
-const DURACAO = 40;
-let horariosDisponiveis = [];
+const form=document.getElementById("formAgendamento");
+const mensagem=document.getElementById("mensagem");
+const botao=document.getElementById("botaoEnviar");
+const campoData=document.getElementById("data");
+const campoHorario=document.getElementById("horario");
+const pixBox=document.getElementById("pixBox");
 
-function dataLocal() {
-  const agora = new Date();
-  return [agora.getFullYear(),String(agora.getMonth()+1).padStart(2,"0"),String(agora.getDate()).padStart(2,"0")].join("-");
+function dataLocal(){
+  const agora=new Date();
+  return [
+    agora.getFullYear(),
+    String(agora.getMonth()+1).padStart(2,"0"),
+    String(agora.getDate()).padStart(2,"0")
+  ].join("-");
 }
 
-campoData.min = dataLocal();
+campoData.min=dataLocal();
 
-function minutosDoHorario(horario) {
-  const partes = horario.split(":").map(Number);
+function minutosDoHorario(horario){
+  const partes=horario.split(":").map(Number);
   return partes[0]*60+partes[1];
 }
 
-function gerarHorarios() {
-  const horarios = [];
+function gerarHorarios(){
+  const horarios=[];
 
-  for(let minutos=7*60;minutos+DURACAO<=11*60;minutos+=DURACAO) {
+  for(let minutos=7*60;minutos+DURACAO<=11*60;minutos+=DURACAO){
     horarios.push(minutos);
   }
 
-  for(let minutos=13*60;minutos+DURACAO<=20*60;minutos+=DURACAO) {
+  for(let minutos=13*60;minutos+DURACAO<=20*60;minutos+=DURACAO){
     horarios.push(minutos);
   }
 
-  return horarios.map(minutos =>
-    `${String(Math.floor(minutos/60)).padStart(2,"0")}:${String(minutos%60).padStart(2,"0")}`
+  return horarios.map(m=>
+    `${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}`
   );
 }
 
-async function carregarHorarios() {
-  const data = campoData.value;
-  campoHorario.innerHTML = '<option value="">Carregando horários...</option>';
-  campoHorario.disabled = true;
-  horariosDisponiveis = [];
+async function carregarHorarios(){
+  const data=campoData.value;
 
-  if (!data) {
-    campoHorario.innerHTML = '<option value="">Primeiro escolha a data</option>';
+  campoHorario.innerHTML='<option value="">Carregando horários...</option>';
+  campoHorario.disabled=true;
+
+  if(!data){
+    campoHorario.innerHTML='<option value="">Primeiro escolha a data</option>';
     return;
   }
 
-  if (data < dataLocal()) {
-    campoHorario.innerHTML = '<option value="">Escolha uma data válida</option>';
+  if(data<dataLocal()){
+    campoHorario.innerHTML='<option value="">Escolha uma data válida</option>';
     return;
   }
 
-  mensagem.textContent = "";
+  mensagem.textContent="";
 
-  try {
-    const {data:ocupados,error} = await db.rpc("horarios_ocupados",{p_data:data});
-    if (error) throw error;
+  try{
+    const {data:ocupados,error}=await db.rpc(
+      "horarios_ocupados",
+      {p_data:data}
+    );
 
-    const agora = new Date();
-    const ehHoje = data === dataLocal();
-    const minutosAgora = agora.getHours()*60+agora.getMinutes();
+    if(error)throw error;
 
-    horariosDisponiveis = gerarHorarios().filter(horario => {
-      const inicio = minutosDoHorario(horario);
-      const fim = inicio+DURACAO;
+    const agora=new Date();
+    const ehHoje=data===dataLocal();
+    const minutosAgora=agora.getHours()*60+agora.getMinutes();
 
-      if (ehHoje && inicio <= minutosAgora) return false;
+    const livres=gerarHorarios().filter(horario=>{
+      const inicio=minutosDoHorario(horario);
+      const fim=inicio+DURACAO;
 
-      return !(ocupados || []).some(item => {
-        const ocupadoInicio = minutosDoHorario(item.horario);
-        const ocupadoFim = ocupadoInicio+Number(item.duracao || DURACAO);
-        return inicio < ocupadoFim && fim > ocupadoInicio;
+      if(ehHoje&&inicio<=minutosAgora)return false;
+
+      return !(ocupados||[]).some(item=>{
+        const ocupadoInicio=minutosDoHorario(item.horario);
+        const ocupadoFim=ocupadoInicio+Number(item.duracao||DURACAO);
+
+        return inicio<ocupadoFim&&fim>ocupadoInicio;
       });
     });
 
-    campoHorario.innerHTML = "";
+    campoHorario.innerHTML="";
 
-    if (!horariosDisponiveis.length) {
-      campoHorario.innerHTML = '<option value="">Nenhum horário disponível</option>';
-      mensagem.textContent = "Não há horários livres nessa data. Escolha outro dia.";
+    if(!livres.length){
+      campoHorario.innerHTML='<option value="">Nenhum horário disponível</option>';
+      mensagem.textContent="Não há horários livres nessa data. Escolha outro dia.";
       return;
     }
 
-    campoHorario.innerHTML = '<option value="">Selecione um horário</option>';
+    campoHorario.innerHTML='<option value="">Selecione um horário</option>';
 
-    horariosDisponiveis.forEach(horario => {
-      const option = document.createElement("option");
-      option.value = horario;
-      option.textContent = horario;
+    livres.forEach(horario=>{
+      const option=document.createElement("option");
+      option.value=horario;
+      option.textContent=horario;
       campoHorario.appendChild(option);
     });
 
-    campoHorario.disabled = false;
+    campoHorario.disabled=false;
 
-  } catch(error) {
+  }catch(error){
     console.error("Erro ao carregar horários:",error);
-    campoHorario.innerHTML = '<option value="">Erro ao carregar horários</option>';
-    mensagem.textContent = "Não foi possível consultar os horários. Atualize a página e tente novamente.";
+    campoHorario.innerHTML='<option value="">Erro ao carregar horários</option>';
+    mensagem.textContent="Não foi possível consultar os horários. Atualize a página e tente novamente.";
   }
 }
 
 campoData.addEventListener("change",carregarHorarios);
 campoData.addEventListener("input",carregarHorarios);
 
-form.addEventListener("submit",async event => {
+form.addEventListener("submit",async event=>{
   event.preventDefault();
 
-  pixBox.style.display = "none";
-  mensagem.textContent = "";
+  pixBox.style.display="none";
+  mensagem.textContent="";
 
-  const nome = document.getElementById("nome").value.trim();
-  const telefone = document.getElementById("telefone").value.trim();
-  const data = campoData.value;
-  const horario = campoHorario.value;
-  const servicoId = document.getElementById("servico").value;
-  const servicoSelecionado = servicosAtivos.find(item => item.id === servicoId);
+  const nome=document.getElementById("nome").value.trim();
+  const telefone=document.getElementById("telefone").value.trim();
+  const data=campoData.value;
+  const horario=campoHorario.value;
+  const servicoId=document.getElementById("servico").value;
 
-  if (!nome || !telefone || !data || !horario || !servicoSelecionado) {
-    mensagem.textContent = "Preencha todos os campos e escolha um horário disponível.";
+  const servicoSelecionado=servicosAtivos.find(item=>item.id===servicoId);
+
+  if(!nome||!telefone||!data||!horario||!servicoSelecionado){
+    mensagem.textContent="Preencha todos os campos e escolha um horário disponível.";
     return;
   }
 
-  if (data < dataLocal()) {
-    mensagem.textContent = "Escolha uma data válida.";
+  if(data<dataLocal()){
+    mensagem.textContent="Escolha uma data válida.";
     return;
   }
 
-  const servico = servicoSelecionado.name;
-  const precoServico = Number(servicoSelecionado.price);
+  const servico=servicoSelecionado.name;
+  const precoServico=Number(servicoSelecionado.price);
 
-  if (!Number.isFinite(precoServico) || precoServico <= 0) {
-    mensagem.textContent = "O preço deste serviço não está configurado corretamente. Entre em contato pelo WhatsApp.";
+  if(!Number.isFinite(precoServico)||precoServico<=0){
+    mensagem.textContent="O preço deste serviço não está configurado corretamente. Entre em contato pelo WhatsApp.";
     return;
   }
 
-  botao.disabled = true;
-  botao.textContent = "ENVIANDO SOLICITAÇÃO...";
+  botao.disabled=true;
+  botao.textContent="ENVIANDO SOLICITAÇÃO...";
 
-  try {
-    const {data:ocupados,error:erroConsulta} = await db.rpc("horarios_ocupados",{p_data:data});
-    if (erroConsulta) throw erroConsulta;
+  try{
+    const {data:ocupados,error:erroConsulta}=await db.rpc(
+      "horarios_ocupados",
+      {p_data:data}
+    );
 
-    const inicioEscolhido = minutosDoHorario(horario);
-    const fimEscolhido = inicioEscolhido+DURACAO;
+    if(erroConsulta)throw erroConsulta;
 
-    const conflito = (ocupados || []).some(item => {
-      const inicioOcupado = minutosDoHorario(item.horario);
-      const fimOcupado = inicioOcupado+Number(item.duracao || DURACAO);
-      return inicioEscolhido < fimOcupado && fimEscolhido > inicioOcupado;
+    const inicioEscolhido=minutosDoHorario(horario);
+    const fimEscolhido=inicioEscolhido+DURACAO;
+
+    const conflito=(ocupados||[]).some(item=>{
+      const inicioOcupado=minutosDoHorario(item.horario);
+      const fimOcupado=inicioOcupado+Number(item.duracao||DURACAO);
+
+      return inicioEscolhido<fimOcupado&&fimEscolhido>inicioOcupado;
     });
 
-    if (conflito) {
-      mensagem.textContent = "Esse horário acabou de ser ocupado. Escolha outro horário.";
+    if(conflito){
+      mensagem.textContent="Esse horário acabou de ser ocupado. Escolha outro horário.";
       await carregarHorarios();
       return;
     }
 
-    const {error} = await db.from("appointments").insert([{
+    const {error}=await db.from("appointments").insert([{
       customer_name:nome,
       customer_phone:telefone,
       service:servico,
@@ -635,71 +603,82 @@ form.addEventListener("submit",async event => {
       status:"pending"
     }]);
 
-    if (error) throw error;
+    if(error)throw error;
 
-    const dataFormatada = data.split("-").reverse().join("/");
+    const dataFormatada=data.split("-").reverse().join("/");
 
-    const textoWhatsApp =
-      `Olá, Sara! Gostaria de solicitar um agendamento.\n\n`+
-      `Nome: ${nome}\nWhatsApp: ${telefone}\nServiço: ${servico}\n`+
-      `Valor: ${formatarMoeda(precoServico)}\nData: ${dataFormatada}\nHorário: ${horario}\n\n`+
-      `Aguardo a confirmação do horário.`;
+    const textoWhatsApp=`Olá, Sara! Gostaria de solicitar um agendamento.
 
-    const linkWhatsApp = `https://wa.me/${WHATSAPP_SARA}?text=${encodeURIComponent(textoWhatsApp)}`;
+Nome: ${nome}
+WhatsApp: ${telefone}
+Serviço: ${servico}
+Valor: ${formatarMoeda(precoServico)}
+Data: ${dataFormatada}
+Horário: ${horario}
 
-    document.getElementById("pixValor").textContent = formatarMoeda(precoServico);
+Aguardo a confirmação do horário.`;
 
-    const textoComprovante =
-      `Olá, Sara! Estou enviando o comprovante do Pix referente ao agendamento.\n\n`+
-      `Nome: ${nome}\nServiço: ${servico}\nValor: ${formatarMoeda(precoServico)}\n`+
-      `Data: ${dataFormatada}\nHorário: ${horario}\n\nSegue o comprovante.`;
+    const linkWhatsApp=`https://wa.me/${WHATSAPP_SARA}?text=${encodeURIComponent(textoWhatsApp)}`;
 
-    document.getElementById("enviarComprovante").href =
+    document.getElementById("pixValor").textContent=formatarMoeda(precoServico);
+
+    const textoComprovante=`Olá, Sara! Estou enviando o comprovante do Pix referente ao agendamento.
+
+Nome: ${nome}
+Serviço: ${servico}
+Valor: ${formatarMoeda(precoServico)}
+Data: ${dataFormatada}
+Horário: ${horario}
+
+Segue o comprovante.`;
+
+    document.getElementById("enviarComprovante").href=
       `https://wa.me/${WHATSAPP_SARA}?text=${encodeURIComponent(textoComprovante)}`;
 
-    mensagem.textContent = "Solicitação registrada! Agora você pode copiar a chave Pix e enviar os dados pelo WhatsApp.";
-    pixBox.style.display = "block";
+    mensagem.textContent="Solicitação registrada! Agora você pode copiar a chave Pix e enviar os dados pelo WhatsApp.";
+
+    pixBox.style.display="block";
     tocarSom("confirmacao");
     window.open(linkWhatsApp,"_blank");
 
-    document.getElementById("nome").value = "";
-    document.getElementById("telefone").value = "";
-    document.getElementById("servico").value = "";
-    document.getElementById("precoSelecionado").textContent = "Selecione um serviço para ver o preço.";
-    campoData.value = "";
-    campoHorario.innerHTML = '<option value="">Primeiro escolha a data</option>';
-    campoHorario.disabled = true;
-    horariosDisponiveis = [];
+    document.getElementById("nome").value="";
+    document.getElementById("telefone").value="";
+    document.getElementById("servico").value="";
+    document.getElementById("precoSelecionado").textContent="Selecione um serviço para ver o preço.";
 
-  } catch(error) {
+    campoData.value="";
+    campoHorario.innerHTML='<option value="">Primeiro escolha a data</option>';
+    campoHorario.disabled=true;
+
+  }catch(error){
     console.error("Erro ao registrar agendamento:",error);
-    mensagem.textContent = "Não foi possível registrar o agendamento. Tente novamente ou entre em contato pelo WhatsApp.";
-  } finally {
-    botao.disabled = false;
-    botao.textContent = "SOLICITAR AGENDAMENTO";
+    mensagem.textContent="Não foi possível registrar o agendamento. Tente novamente ou entre em contato pelo WhatsApp.";
+  }finally{
+    botao.disabled=false;
+    botao.textContent="Solicitar agendamento";
   }
 });
 
-/* COPIAR CHAVE PIX */
-document.getElementById("copiarPix").addEventListener("click",async () => {
-  try {
+document.getElementById("copiarPix").addEventListener("click",async()=>{
+  try{
     await navigator.clipboard.writeText(CHAVE_PIX);
-    document.getElementById("copiarPix").textContent = "CHAVE PIX COPIADA!";
-  } catch(error) {
-    const campoTemporario = document.createElement("textarea");
-    campoTemporario.value = CHAVE_PIX;
-    document.body.appendChild(campoTemporario);
-    campoTemporario.select();
+  }catch(error){
+    const temporario=document.createElement("textarea");
+    temporario.value=CHAVE_PIX;
+    document.body.appendChild(temporario);
+    temporario.select();
     document.execCommand("copy");
-    campoTemporario.remove();
-    document.getElementById("copiarPix").textContent = "CHAVE PIX COPIADA!";
+    temporario.remove();
   }
+
+  document.getElementById("copiarPix").textContent="Chave Pix copiada!";
 });
 
 /* INICIALIZAÇÃO */
 carregarServicosPublicos();
 carregarGaleria();
 carregarAvaliacoes();
+
 </script>
 </body>
 </html>
