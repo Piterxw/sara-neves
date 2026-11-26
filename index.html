@@ -75,6 +75,10 @@ h1,h2,h3{font-family:'Playfair Display',serif;font-weight:400}
 .pix-key{font-weight:700;font-size:16px;overflow-wrap:anywhere;margin:10px 0;color:var(--brown)}
 .pix-button{width:100%;padding:14px;background:var(--champagne);color:var(--deep);font-size:11px;font-weight:700;letter-spacing:1px;margin-top:12px}
 .pix-help{font-size:12px;line-height:1.8;color:var(--muted);margin-top:12px}
+.location-panel{max-width:900px;margin:15px auto 85px;padding:clamp(18px,4vw,30px);background:var(--white);border:1px solid #e8dbcd;box-shadow:0 18px 50px #59443712;border-radius:22px;text-align:center}
+.location-map{width:100%;height:360px;border:0;border-radius:15px;background:var(--beige);display:block}
+.location-panel p{margin:18px auto 0;max-width:580px;color:var(--muted);font-size:13px;line-height:1.8}
+.location-panel .primary-btn{margin-top:22px}
 .contact{text-align:center;padding:70px 20px 85px;background:#f0e5d9}
 .contact h2{font-size:35px;color:var(--brown)}
 .contact p{margin:13px 0;color:var(--muted);font-size:14px}
@@ -110,6 +114,7 @@ footer a{display:inline-block;margin-top:13px;color:#eee3d7;font-size:11px}
   <a class="float-link" href="#galeria" data-view="gallery" aria-label="Galeria">▧<span>Galeria</span></a>
   <a class="float-link" href="#avaliacoes" data-view="reviews" aria-label="Avaliações">★<span>Avaliações</span></a>
   <a class="float-link" href="#agendar" data-view="booking" aria-label="Agendar">♡<span>Agendar</span></a>
+  <a class="float-link" href="#local" data-view="local" aria-label="Local">⌖<span>Local</span></a>
 </nav>
 
 <main>
@@ -152,8 +157,7 @@ footer a{display:inline-block;margin-top:13px;color:#eee3d7;font-size:11px}
 
 <section class="view" id="view-reviews">
   <div class="page-heading"><div class="kicker">A EXPERIÊNCIA DE QUEM CONFIA</div><h1>Avaliações</h1><p>Veja o que nossas clientes compartilharam e conte como foi sua experiência.</p></div>
-  <div class="content-wrap">
-    <div id="avaliacoesPublicadas" class="reviews-list"><p class="empty">Carregando avaliações...</p></div>
+  <div class="content-wrap"><div id="avaliacoesPublicadas" class="reviews-list"><p class="empty">Carregando avaliações...</p></div>
     <form id="formAvaliacao" class="form-panel">
       <div class="kicker">SUA OPINIÃO É IMPORTANTE</div><h2 style="font-size:30px;color:var(--brown)">Deixe sua avaliação</h2>
       <label for="nomeAvaliacao">SEU NOME</label><input id="nomeAvaliacao" type="text" maxlength="80" placeholder="Como podemos te chamar?" required>
@@ -166,6 +170,17 @@ footer a{display:inline-block;margin-top:13px;color:#eee3d7;font-size:11px}
       <p class="notice">Sua avaliação será enviada para análise e só aparecerá no site depois da aprovação da responsável.</p>
       <p id="mensagemAvaliacao" role="status" aria-live="polite"></p>
     </form>
+  </div>
+</section>
+
+<section class="view" id="view-local">
+  <div class="page-heading"><div class="kicker">SARA NEVES BROW STUDIO</div><h1>Local</h1><p>Veja a localização do estúdio no Google Maps e consulte o trajeto antes de sair.</p></div>
+  <div class="content-wrap">
+    <div class="location-panel">
+      <iframe class="location-map" title="Mapa de localização do Sara Neves Brow Studio" src="https://www.google.com/maps?q=-20.3522949,-41.529953&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      <p>Toque no botão abaixo para abrir a localização diretamente no Google Maps.</p>
+      <a class="primary-btn" href="https://maps.app.goo.gl/TdZsKFng3UggXwTs9" target="_blank" rel="noopener noreferrer">Abrir localização no Google Maps</a>
+    </div>
   </div>
 </section>
 
@@ -186,7 +201,7 @@ footer a{display:inline-block;margin-top:13px;color:#eee3d7;font-size:11px}
       <p>Chave Pix da Sara:</p><div class="pix-key" id="pixChave">+55 28 99911-5294</div>
       <button class="pix-button" type="button" id="copiarPix">Copiar chave Pix</button>
       <p class="pix-help">Após realizar o Pix, envie o comprovante pelo WhatsApp. O agendamento só será confirmado depois que a responsável verificar o pagamento e confirmar o horário.</p>
-      <a class="primary-btn" id="enviarComprovante" href="https://wa.me/5528999115294" target="_blank" rel="noopener">Enviar comprovante pelo WhatsApp</a>
+      <a class="primary-btn" id="enviarComprovante" href="https://wa.me/5528999115294" target="_blank" rel="noopener">Mensagem WhatsApp</a>
     </div>
   </form>
 </section>
@@ -198,467 +213,459 @@ footer a{display:inline-block;margin-top:13px;color:#eee3d7;font-size:11px}
 </footer>
 
 <script>
-"use strict";
-
-/* CONFIGURAÇÃO */
 const SUPABASE_URL = "https://upgthlpcnnskasemvzso.supabase.co";
 const SUPABASE_KEY = "sb_publishable_o9oit1hipzi18_UjCpXWwg_WsRuG67p";
-const WHATSAPP_SARA = "5528999115294";
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const CHAVE_PIX = "+5528999115294";
+const WHATSAPP_SARA = "5528999115294";
 const DURACAO = 40;
 
-if (!window.supabase) {
-  alert("Não foi possível carregar a conexão com o banco. Verifique sua internet e atualize a página.");
-  throw new Error("Biblioteca Supabase não carregada.");
-}
-
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-let servicosAtivos = [];
-let notaSelecionada = 0;
-
-/* NAVEGAÇÃO */
 function abrirView(nome) {
-  document.querySelectorAll(".view").forEach(view => view.classList.remove("active"));
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   const destino = document.getElementById("view-" + nome);
   if (!destino) return;
-
   destino.classList.add("active");
   document.querySelectorAll(".float-link[data-view]").forEach(link => {
     link.classList.toggle("active", link.dataset.view === nome);
   });
-
-  window.scrollTo({ top: 0, behavior: "smooth" });
-  history.replaceState(null, "", "#" + nome);
+  window.scrollTo({top:0,behavior:"smooth"});
+  history.replaceState(null,"","#" + nome);
 }
+document.querySelectorAll("[data-view]").forEach(link => link.addEventListener("click",e=>{
+  e.preventDefault(); abrirView(link.dataset.view);
+}));
+document.querySelectorAll("[data-open]").forEach(button=>button.addEventListener("click",()=>abrirView(button.dataset.open)));
 
-document.querySelectorAll("[data-view]").forEach(link => {
-  link.addEventListener("click", event => {
-    event.preventDefault();
-    abrirView(link.dataset.view);
-  });
-});
-
-document.querySelectorAll("[data-open]").forEach(button => {
-  button.addEventListener("click", () => abrirView(button.dataset.open));
-});
-
-/* FUNÇÕES GERAIS */
-function formatarMoeda(valor) {
-  return Number(valor).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL"
-  });
+let contextoAudio=null;
+function tocarSom(tipo="toque"){
+  try{
+    const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+    if(!AudioContextClass)return;
+    if(!contextoAudio)contextoAudio=new AudioContextClass();
+    if(contextoAudio.state==="suspended")contextoAudio.resume();
+    const agora=contextoAudio.currentTime;
+    const osc=contextoAudio.createOscillator(),gain=contextoAudio.createGain();
+    osc.type="sine";osc.frequency.setValueAtTime(tipo==="confirmacao"?760:520,agora);
+    gain.gain.setValueAtTime(.0001,agora);gain.gain.exponentialRampToValueAtTime(.045,agora+.02);gain.gain.exponentialRampToValueAtTime(.0001,agora+.18);
+    osc.connect(gain);gain.connect(contextoAudio.destination);osc.start();osc.stop(agora+.2);
+  }catch(e){console.warn("Som indisponível",e);}
 }
-
-function dataLocalHoje() {
-  const agora = new Date();
-  const ano = agora.getFullYear();
-  const mes = String(agora.getMonth() + 1).padStart(2, "0");
-  const dia = String(agora.getDate()).padStart(2, "0");
-  return `${ano}-${mes}-${dia}`;
-}
-
-function exibirMensagem(elemento, texto) {
-  if (elemento) elemento.textContent = texto;
-}
+document.addEventListener("click",e=>{if(e.target.closest("button,.primary-btn,.secondary-btn"))tocarSom();});
+function formatarMoeda(valor){return Number(valor).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});}
 
 /* SERVIÇOS */
-async function carregarServicosPublicos() {
-  const seletor = document.getElementById("servico");
-  const cards = document.getElementById("cardsServicos");
-  const preco = document.getElementById("precoSelecionado");
-
-  try {
-    const { data, error } = await db
-      .from("services")
-      .select("id,name,price,active,created_at")
-      .eq("active", true)
-      .order("created_at", { ascending: true });
-
-    if (error) throw error;
-
-    servicosAtivos = (data || []).filter(item =>
-      item.name && Number.isFinite(Number(item.price)) && Number(item.price) >= 0
-    );
-
-    seletor.innerHTML = '<option value="">Selecione um serviço</option>';
-    cards.replaceChildren();
-
-    if (servicosAtivos.length === 0) {
-      seletor.innerHTML = '<option value="">Nenhum serviço disponível</option>';
-      cards.innerHTML = '<p class="empty">Nenhum serviço ativo cadastrado no momento.</p>';
-      preco.textContent = "Consulte os valores pelo WhatsApp.";
+let servicosAtivos=[];
+async function carregarServicosPublicos(){
+  const seletor=document.getElementById("servico");
+  const cards=document.getElementById("cardsServicos");
+  const preco=document.getElementById("precoSelecionado");
+  try{
+    const {data,error}=await db.from("services").select("id,name,price,active").eq("active",true).order("created_at",{ascending:true});
+    if(error)throw error;
+    servicosAtivos=(data||[]).filter(item=>Number.isFinite(Number(item.price))&&Number(item.price)>0);
+    seletor.innerHTML='<option value="">Selecione um serviço</option>';cards.replaceChildren();
+    if(!servicosAtivos.length){
+      seletor.innerHTML='<option value="">Nenhum serviço disponível</option>';
+      cards.innerHTML='<p class="empty">Nenhum serviço disponível no momento.</p>';
+      preco.textContent="";
       return;
     }
 
-    servicosAtivos.forEach((item, index) => {
-      const option = document.createElement("option");
-      option.value = item.id;
-      option.textContent = `${item.name} — ${formatarMoeda(item.price)}`;
+    servicosAtivos.forEach((item,index)=>{
+      const option=document.createElement("option");
+      option.value=item.id;
+      option.textContent=`${item.name} — ${formatarMoeda(item.price)}`;
       seletor.appendChild(option);
 
-      const card = document.createElement("article");
-      card.className = "service-card";
+      const card=document.createElement("article");
+      card.className="service-card";
 
-      const numero = document.createElement("div");
-      numero.className = "service-number";
-      numero.textContent = String(index + 1).padStart(2, "0");
+      const numero=document.createElement("div");
+      numero.className="service-number";
+      numero.textContent=String(index+1).padStart(2,"0");
 
-      const titulo = document.createElement("h3");
-      titulo.textContent = item.name;
+      const titulo=document.createElement("h3");
+      titulo.textContent=item.name;
 
-      const descricao = document.createElement("p");
-      descricao.textContent = "Um cuidado especial para valorizar sua beleza natural.";
+      const descricao=document.createElement("p");
+      descricao.textContent="Um cuidado especial para valorizar sua beleza natural.";
 
-      const valor = document.createElement("div");
-      valor.className = "service-price";
-      valor.textContent = formatarMoeda(item.price);
+      const valor=document.createElement("div");
+      valor.className="service-price";
+      valor.textContent=formatarMoeda(item.price);
 
-      card.append(numero, titulo, descricao, valor);
+      card.append(numero,titulo,descricao,valor);
       cards.appendChild(card);
     });
-  } catch (error) {
-    console.error("Erro ao carregar serviços:", error);
-    seletor.innerHTML = '<option value="">Erro ao carregar serviços</option>';
-    cards.innerHTML = '<p class="empty">Não foi possível carregar os serviços. Confira a conexão e as permissões do Supabase.</p>';
-    preco.textContent = "Não foi possível consultar os preços.";
+
+  }catch(error){
+    console.error("Erro ao carregar serviços:",error);
+    cards.innerHTML='<p class="empty">Não foi possível carregar os serviços.</p>';
+    seletor.innerHTML='<option value="">Erro ao carregar serviços</option>';
   }
 }
 
-document.getElementById("servico").addEventListener("change", () => {
-  const id = document.getElementById("servico").value;
-  const servico = servicosAtivos.find(item => String(item.id) === String(id));
+document.getElementById("servico").addEventListener("change",()=>{
+  const selecionado=servicosAtivos.find(
+    item=>String(item.id)===document.getElementById("servico").value
+  );
 
-  document.getElementById("precoSelecionado").textContent = servico
-    ? "Valor: " + formatarMoeda(servico.price)
-    : "Selecione um serviço para ver o preço.";
+  document.getElementById("precoSelecionado").textContent=
+    selecionado ? formatarMoeda(selecionado.price) : "";
 });
 
+
 /* GALERIA */
-async function carregarGaleria() {
-  const galeria = document.getElementById("galeriaFotos");
-  galeria.innerHTML = '<p class="empty">Carregando fotos...</p>';
+async function carregarGaleria(){
+  const galeria=document.getElementById("galeriaFotos");
 
-  try {
-    const { data, error } = await db
+  try{
+    const {data,error}=await db
       .from("gallery_photos")
-      .select("id,image_url,caption,created_at")
-      .order("created_at", { ascending: false });
+      .select("id,image_url,caption")
+      .order("created_at",{ascending:false});
 
-    if (error) throw error;
+    if(error)throw error;
 
-    galeria.innerHTML = "";
+    galeria.replaceChildren();
 
-    if (!data || data.length === 0) {
-      galeria.innerHTML = '<p class="empty">Nenhuma foto disponível no momento.</p>';
+    if(!data || !data.length){
+      galeria.innerHTML='<p class="empty">Nenhuma foto disponível no momento.</p>';
       return;
     }
 
-    data.forEach(item => {
-      if (!item.image_url) return;
+    data.forEach(item=>{
+      const card=document.createElement("article");
+      card.className="gallery-card";
 
-      const card = document.createElement("article");
-      card.className = "gallery-card";
+      const imagem=document.createElement("img");
+      imagem.src=item.image_url;
+      imagem.alt=item.caption || "Foto da galeria";
+      imagem.loading="lazy";
 
-      const imagem = document.createElement("img");
-      imagem.src = item.image_url;
-      imagem.alt = item.caption || "Foto da galeria";
-      imagem.loading = "lazy";
+      card.appendChild(imagem);
 
-      const legenda = document.createElement("p");
-      legenda.textContent = item.caption || "";
+      if(item.caption){
+        const legenda=document.createElement("p");
+        legenda.textContent=item.caption;
+        card.appendChild(legenda);
+      }
 
-      card.append(imagem, legenda);
       galeria.appendChild(card);
     });
 
-  } catch (error) {
-    console.error("Erro ao carregar galeria:", error);
-    galeria.innerHTML = '<p class="empty">Não foi possível carregar as fotos.</p>';
+  }catch(error){
+    console.error("Erro ao carregar galeria:",error);
+    galeria.innerHTML='<p class="empty">Não foi possível carregar a galeria.</p>';
   }
 }
 
-/* AVALIAÇÕES */
-async function carregarAvaliacoes() {
-  const lista = document.getElementById("avaliacoesPublicadas");
-  lista.innerHTML = '<p class="empty">Carregando avaliações...</p>';
 
-  try {
-    const { data, error } = await db
+/* AVALIAÇÕES */
+async function carregarAvaliacoes(){
+  const lista=document.getElementById("avaliacoesPublicadas");
+
+  try{
+    const {data,error}=await db
       .from("reviews")
       .select("id,customer_name,rating,comment,created_at")
-      .eq("status", "approved")
-      .order("created_at", { ascending: false });
+      .eq("status","approved")
+      .order("created_at",{ascending:false});
 
-    if (error) throw error;
+    if(error)throw error;
 
-    lista.innerHTML = "";
+    lista.replaceChildren();
 
-    if (!data || data.length === 0) {
-      lista.innerHTML = '<p class="empty">Ainda não há avaliações publicadas.</p>';
+    if(!data || !data.length){
+      lista.innerHTML='<p class="empty">Seja a primeira pessoa a avaliar!</p>';
       return;
     }
 
-    data.forEach(item => {
-      const card = document.createElement("article");
-      card.className = "review-card";
+    data.forEach(item=>{
+      const card=document.createElement("article");
+      card.className="review-card";
 
-      const estrelas = document.createElement("div");
-      estrelas.className = "stars";
-      const nota = Math.max(0, Math.min(5, Number(item.rating) || 0));
-      estrelas.textContent = "★".repeat(nota) + "☆".repeat(5 - nota);
+      const nome=document.createElement("h3");
+      nome.textContent=item.customer_name;
 
-      const nome = document.createElement("h3");
-      nome.textContent = item.customer_name || "Cliente";
+      const nota=document.createElement("div");
+      nota.className="review-rating";
+      nota.textContent="★".repeat(Number(item.rating))+
+        "☆".repeat(5-Number(item.rating));
 
-      const comentario = document.createElement("p");
-      comentario.textContent = item.comment || "";
+      const comentario=document.createElement("p");
+      comentario.textContent=item.comment;
 
-      card.append(estrelas, nome, comentario);
+      card.append(nome,nota,comentario);
       lista.appendChild(card);
     });
 
-  } catch (error) {
-    console.error("Erro ao carregar avaliações:", error);
-    lista.innerHTML = '<p class="empty">Não foi possível carregar as avaliações.</p>';
+  }catch(error){
+    console.error("Erro ao carregar avaliações:",error);
+    lista.innerHTML='<p class="empty">Não foi possível carregar as avaliações.</p>';
   }
 }
 
-/* FORMULÁRIO DE AVALIAÇÃO */
-const estrelasFormulario = document.querySelectorAll(".review-star");
-const formularioAvaliacao = document.getElementById("formAvaliacao");
+let notaSelecionada=0;
 
-estrelasFormulario.forEach(estrela => {
-  estrela.addEventListener("click", () => {
-    notaSelecionada = Number(estrela.dataset.rating);
+const estrelas=document.querySelectorAll(".review-star");
+const formularioAvaliacao=document.getElementById("formAvaliacao");
+const mensagemAvaliacao=document.getElementById("mensagemAvaliacao");
 
-    estrelasFormulario.forEach(item => {
-      const nota = Number(item.dataset.rating);
-      const selecionada = nota <= notaSelecionada;
-      item.classList.toggle("selected", selecionada);
-      item.textContent = selecionada ? "★" : "☆";
+estrelas.forEach(estrela=>{
+  estrela.addEventListener("click",()=>{
+    notaSelecionada=Number(estrela.dataset.rating);
+
+    estrelas.forEach(item=>{
+      const ativa=Number(item.dataset.rating)<=notaSelecionada;
+      item.classList.toggle("active",ativa);
     });
   });
 });
 
-formularioAvaliacao.addEventListener("submit", async event => {
-  event.preventDefault();
+formularioAvaliacao.addEventListener("submit",async evento=>{
+  evento.preventDefault();
 
-  const nome = document.getElementById("nomeAvaliacao").value.trim();
-  const comentario = document.getElementById("comentarioAvaliacao").value.trim();
-  const mensagem = document.getElementById("mensagemAvaliacao");
-  const botao = document.getElementById("botaoAvaliacao");
+  const nome=document.getElementById("nomeAvaliacao").value.trim();
+  const comentario=document.getElementById("comentarioAvaliacao").value.trim();
 
-  if (!nome || !comentario || notaSelecionada < 1 || notaSelecionada > 5) {
-    mensagem.textContent = "Preencha seu nome, comentário e selecione as estrelas.";
+  if(!nome || !comentario || notaSelecionada===0){
+    mensagemAvaliacao.textContent="Preencha seu nome, comentário e escolha uma nota.";
     return;
   }
 
-  botao.disabled = true;
+  const botao=formularioAvaliacao.querySelector('button[type="submit"]');
+  botao.disabled=true;
 
-  try {
-    const { error } = await db.from("reviews").insert([{
-      customer_name: nome,
-      rating: notaSelecionada,
-      comment: comentario,
-      status: "pending"
-    }]);
-
-    if (error) throw error;
-
-    mensagem.textContent = "Avaliação enviada! Ela será publicada após aprovação.";
-    formularioAvaliacao.reset();
-    notaSelecionada = 0;
-
-    estrelasFormulario.forEach(item => {
-      item.classList.remove("selected");
-      item.textContent = "☆";
+  try{
+    const {error}=await db.from("reviews").insert({
+      customer_name:nome,
+      rating:notaSelecionada,
+      comment:comentario,
+      status:"pending"
     });
 
-  } catch (error) {
-    console.error("Erro ao enviar avaliação:", error);
-    mensagem.textContent = "Não foi possível enviar a avaliação.";
-  } finally {
-    botao.disabled = false;
+    if(error)throw error;
+
+    mensagemAvaliacao.textContent="Avaliação enviada! Ela aparecerá após aprovação.";
+    formularioAvaliacao.reset();
+    notaSelecionada=0;
+
+    estrelas.forEach(item=>item.classList.remove("active"));
+
+  }catch(error){
+    console.error("Erro ao enviar avaliação:",error);
+    mensagemAvaliacao.textContent="Não foi possível enviar sua avaliação. Tente novamente.";
+  }finally{
+    botao.disabled=false;
   }
 });
 
-/* HORÁRIOS */
-function gerarHorarios() {
-  const horarios = [];
-  const periodos = [
-    { inicio: 7 * 60, fim: 11 * 60 },
-    { inicio: 13 * 60, fim: 20 * 60 }
-  ];
 
-  periodos.forEach(periodo => {
-    for (let minutos = periodo.inicio; minutos + 40 <= periodo.fim; minutos += 40) {
-      const hora = String(Math.floor(minutos / 60)).padStart(2, "0");
-      const minuto = String(minutos % 60).padStart(2, "0");
-      horarios.push(`${hora}:${minuto}`);
+/* HORÁRIOS */
+function gerarHorarios(){
+  const horarios=[];
+
+  function adicionar(inicio,fim){
+    let [hora,minuto]=inicio.split(":").map(Number);
+    const [fimHora,fimMinuto]=fim.split(":").map(Number);
+
+    while(hora<fimHora || (hora===fimHora && minuto<=fimMinuto)){
+      horarios.push(
+        `${String(hora).padStart(2,"0")}:${String(minuto).padStart(2,"0")}`
+      );
+
+      minuto+=40;
+
+      if(minuto>=60){
+        hora+=Math.floor(minuto/60);
+        minuto=minuto%60;
+      }
     }
-  });
+  }
+
+  adicionar("07:00","11:00");
+  adicionar("13:00","20:00");
 
   return horarios;
 }
 
-function normalizarHorario(item) {
-  if (typeof item === "string") return item.slice(0, 5);
-  return String(item.horario || item.appointment_time || "").slice(0, 5);
+function normalizarHorario(item){
+  if(typeof item==="string")return item.slice(0,5);
+
+  return String(item?.horario || item?.appointment_time || "").slice(0,5);
 }
 
-async function consultarHorariosOcupados(data) {
-  const { data: ocupados, error } = await db.rpc("horarios_ocupados", {
-    p_data: data
-  });
+async function consultarHorariosOcupados(data){
+  const {data:ocupados,error}=await db.rpc(
+    "horarios_ocupados",
+    {p_data:data}
+  );
 
-  if (error) throw error;
+  if(error)throw error;
 
-  return (ocupados || []).map(normalizarHorario).filter(Boolean);
+  return (ocupados||[]).map(normalizarHorario);
 }
 
-async function carregarHorarios() {
-  const campoData = document.getElementById("data");
-  const seletorHorario = document.getElementById("horario");
-  const data = campoData.value;
+async function atualizarHorarios(){
+  const campoData=document.getElementById("data");
+  const seletor=document.getElementById("horario");
+  const data=campoData.value;
 
-  seletorHorario.disabled = true;
-  seletorHorario.innerHTML = '<option value="">Carregando horários...</option>';
+  seletor.innerHTML='<option value="">Carregando horários...</option>';
 
-  if (!data) {
-    seletorHorario.innerHTML = '<option value="">Primeiro escolha a data</option>';
+  if(!data){
+    seletor.innerHTML='<option value="">Escolha uma data primeiro</option>';
     return;
   }
 
-  try {
-    const ocupados = await consultarHorariosOcupados(data);
-    const disponiveis = gerarHorarios().filter(horario => !ocupados.includes(horario));
+  try{
+    const ocupados=await consultarHorariosOcupados(data);
+    const disponiveis=gerarHorarios().filter(horario=>!ocupados.includes(horario));
 
-    seletorHorario.innerHTML = "";
+    seletor.replaceChildren();
 
-    if (!disponiveis.length) {
-      seletorHorario.innerHTML = '<option value="">Nenhum horário disponível</option>';
+    if(!disponiveis.length){
+      seletor.innerHTML='<option value="">Nenhum horário disponível</option>';
       return;
     }
 
-    seletorHorario.innerHTML = '<option value="">Selecione um horário</option>';
+    seletor.innerHTML='<option value="">Selecione um horário</option>';
 
-    disponiveis.forEach(horario => {
-      const option = document.createElement("option");
-      option.value = horario;
-      option.textContent = horario;
-      seletorHorario.appendChild(option);
+    disponiveis.forEach(horario=>{
+      const option=document.createElement("option");
+      option.value=horario;
+      option.textContent=horario;
+      seletor.appendChild(option);
     });
 
-    seletorHorario.disabled = false;
-
-  } catch (error) {
-    console.error("Erro ao consultar horários:", error);
-    seletorHorario.innerHTML = '<option value="">Erro ao consultar horários</option>';
+  }catch(error){
+    console.error("Erro ao consultar horários:",error);
+    seletor.innerHTML='<option value="">Erro ao carregar horários</option>';
   }
 }
 
-function dataLocalHoje() {
-  const agora = new Date();
-  return `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, "0")}-${String(agora.getDate()).padStart(2, "0")}`;
+document.getElementById("data").addEventListener("change",atualizarHorarios);
+
+
+/* DATA MÍNIMA */
+function dataLocalHoje(){
+  const hoje=new Date();
+  const ano=hoje.getFullYear();
+  const mes=String(hoje.getMonth()+1).padStart(2,"0");
+  const dia=String(hoje.getDate()).padStart(2,"0");
+
+  return `${ano}-${mes}-${dia}`;
 }
 
-document.getElementById("data").min = dataLocalHoje();
-document.getElementById("data").addEventListener("change", carregarHorarios);
+document.getElementById("data").min=dataLocalHoje();
+
 
 /* AGENDAMENTO */
-const formularioAgendamento = document.getElementById("formAgendamento");
+const formularioAgendamento=document.getElementById("formAgendamento");
+const mensagemAgendamento=document.getElementById("mensagem");
 
-formularioAgendamento.addEventListener("submit", async event => {
-  event.preventDefault();
+formularioAgendamento.addEventListener("submit",async evento=>{
+  evento.preventDefault();
 
-  const botao = document.getElementById("botaoEnviar");
-  const mensagem = document.getElementById("mensagem");
+  const nome=document.getElementById("nome").value.trim();
+  const telefone=document.getElementById("telefone").value.trim();
+  const data=document.getElementById("data").value;
+  const horario=document.getElementById("horario").value;
+  const servicoId=document.getElementById("servico").value;
 
-  const nome = document.getElementById("nome").value.trim();
-  const telefone = document.getElementById("telefone").value.trim();
-  const servicoId = document.getElementById("servico").value;
-  const data = document.getElementById("data").value;
-  const horario = document.getElementById("horario").value;
+  const servicoSelecionado=servicosAtivos.find(
+    item=>String(item.id)===servicoId
+  );
 
-  const servico = servicosAtivos.find(item => String(item.id) === String(servicoId));
-
-  if (!nome || !telefone || !servico || !data || !horario) {
-    mensagem.textContent = "Preencha todos os campos e escolha um horário.";
+  if(!nome || !telefone || !data || !horario || !servicoSelecionado){
+    mensagemAgendamento.textContent="Preencha todos os campos.";
     return;
   }
 
-  botao.disabled = true;
-  botao.textContent = "Enviando solicitação...";
+  if(data<dataLocalHoje()){
+    mensagemAgendamento.textContent="Escolha uma data válida.";
+    return;
+  }
 
-  try {
-    const ocupados = await consultarHorariosOcupados(data);
+  const botao=formularioAgendamento.querySelector('button[type="submit"]');
+  botao.disabled=true;
+  mensagemAgendamento.textContent="Verificando disponibilidade...";
 
-    if (ocupados.includes(horario)) {
-      mensagem.textContent = "Esse horário acabou de ser ocupado. Escolha outro.";
-      await carregarHorarios();
+  try{
+    const ocupados=await consultarHorariosOcupados(data);
+
+    if(ocupados.includes(horario)){
+      mensagemAgendamento.textContent="Esse horário acabou de ser reservado. Escolha outro.";
+      await atualizarHorarios();
       return;
     }
 
-    const { error } = await db.from("appointments").insert([{
-      customer_name: nome,
-      customer_phone: telefone,
-      service: servico.name,
-      service_price: Number(servico.price),
-      appointment_date: data,
-      appointment_time: horario,
-      status: "pending"
-    }]);
+    const {data:agendamento,error}=await db
+      .from("appointments")
+      .insert({
+        customer_name:nome,
+        customer_phone:telefone,
+        service:servicoSelecionado.name,
+        service_price:Number(servicoSelecionado.price),
+        appointment_date:data,
+        appointment_time:horario,
+        status:"pending"
+      })
+      .select()
+      .single();
 
-    if (error) throw error;
+    if(error)throw error;
 
-    const valor = formatarMoeda(servico.price);
-    document.getElementById("pixValor").textContent = valor;
-    document.getElementById("pixBox").style.display = "block";
+    document.getElementById("pixValor").textContent=
+      formatarMoeda(servicoSelecionado.price);
 
-    const texto = `Olá! Solicitei um agendamento no Sara Neves Brow Studio.
-Nome: ${nome}
-Telefone: ${telefone}
-Serviço: ${servico.name}
-Valor: ${valor}
-Data: ${data}
-Horário: ${horario}
-Aguardo a confirmação.`;
+    document.getElementById("pixChave").textContent=CHAVE_PIX;
 
-    document.getElementById("enviarComprovante").href =
-      "https://wa.me/5528999115294?text=" + encodeURIComponent(texto);
+    const mensagemWhatsApp=
+      `Olá, Sara! Acabei de fazer um agendamento.\n\n`+
+      `Nome: ${nome}\n`+
+      `Telefone: ${telefone}\n`+
+      `Serviço: ${servicoSelecionado.name}\n`+
+      `Data: ${data}\n`+
+      `Horário: ${horario}\n`+
+      `Valor: ${formatarMoeda(servicoSelecionado.price)}\n\n`+
+      `Gostaria de confirmar meu agendamento.`;
 
-    mensagem.textContent = "Solicitação registrada! Confira o Pix e envie a mensagem pelo WhatsApp. Aguarde a confirmação.";
+    document.getElementById("enviarComprovante").href=
+      `https://wa.me/${WHATSAPP_SARA}?text=${encodeURIComponent(mensagemWhatsApp)}`;
 
-    await carregarHorarios();
+    document.getElementById("pixBox").hidden=false;
 
-  } catch (error) {
-    console.error("Erro ao registrar agendamento:", error);
-    mensagem.textContent = "Não foi possível registrar. Confira os dados e tente novamente.";
-  } finally {
-    botao.disabled = false;
-    botao.textContent = "Solicitar agendamento";
+    mensagemAgendamento.textContent="Agendamento registrado! Faça o pagamento via Pix e envie uma mensagem para Sara.";
+
+    formularioAgendamento.reset();
+    document.getElementById("precoSelecionado").textContent="";
+    document.getElementById("horario").innerHTML=
+      '<option value="">Escolha uma data primeiro</option>';
+
+  }catch(error){
+    console.error("Erro ao realizar agendamento:",error);
+    mensagemAgendamento.textContent="Não foi possível concluir o agendamento. Tente novamente.";
+  }finally{
+    botao.disabled=false;
   }
 });
 
-/* COPIAR PIX */
-document.getElementById("copiarPix").addEventListener("click", async () => {
-  const botao = document.getElementById("copiarPix");
 
-  try {
-    await navigator.clipboard.writeText("+5528999115294");
-    botao.textContent = "Chave Pix copiada!";
-  } catch (error) {
-    console.error("Erro ao copiar Pix:", error);
-    botao.textContent = "Copie a chave exibida acima";
+/* COPIAR CHAVE PIX */
+document.getElementById("copiarPix").addEventListener("click",async()=>{
+  try{
+    await navigator.clipboard.writeText(CHAVE_PIX);
+    document.getElementById("copiarPix").textContent="Copiado!";
+  }catch(error){
+    console.error("Erro ao copiar Pix:",error);
+    document.getElementById("copiarPix").textContent="Não foi possível copiar";
   }
 });
+
 
 /* INICIALIZAÇÃO */
 carregarServicosPublicos();
 carregarGaleria();
 carregarAvaliacoes();
-</script>
-</body>
-</html>
