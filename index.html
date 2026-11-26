@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -67,6 +68,8 @@ nav a {
   letter-spacing:1px;
 }
 
+nav a:hover {color:var(--gold)}
+
 .hero {
   min-height:620px;
   display:flex;
@@ -80,6 +83,7 @@ nav a {
 }
 
 .hero-content {max-width:520px}
+
 .eyebrow {
   font-size:11px;
   letter-spacing:4px;
@@ -174,6 +178,58 @@ h2 {
   color:#8c7b6e;
   font-size:13px;
   line-height:1.7;
+}
+
+/* GALERIA */
+.gallery {
+  padding:90px 8%;
+  text-align:center;
+  background:#fffdfa;
+}
+
+.gallery-intro {
+  max-width:520px;
+  margin:18px auto 35px;
+  color:#806f61;
+  font-size:14px;
+  line-height:1.8;
+}
+
+.gallery-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:22px;
+  max-width:1100px;
+  margin:40px auto 0;
+}
+
+.gallery-card {
+  background:var(--cream);
+  border:1px solid var(--beige);
+  overflow:hidden;
+  text-align:left;
+}
+
+.gallery-card img {
+  display:block;
+  width:100%;
+  height:280px;
+  object-fit:cover;
+  background:var(--beige);
+}
+
+.gallery-card p {
+  padding:16px;
+  color:var(--brown);
+  font-size:13px;
+  line-height:1.7;
+}
+
+.gallery-empty {
+  grid-column:1/-1;
+  color:#806f61;
+  padding:25px;
+  font-size:14px;
 }
 
 .booking {
@@ -287,6 +343,9 @@ footer p {margin-top:12px;font-size:11px;letter-spacing:1px}
   .hero {min-height:550px;padding:55px 8%;background-position:58% center}
   .service-grid {grid-template-columns:1fr}
   .services {padding-left:7%;padding-right:7%}
+  .gallery {padding:65px 7%}
+  .gallery-grid {grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .gallery-card img {height:190px}
   form {padding:24px 19px}
 }
 </style>
@@ -302,6 +361,7 @@ footer p {margin-top:12px;font-size:11px;letter-spacing:1px}
 
   <nav>
     <a href="#servicos">SERVIÇOS</a>
+    <a href="#galeria">GALERIA</a>
     <a href="#agendar">AGENDAR</a>
     <a href="admin.html">ÁREA ADM</a>
   </nav>
@@ -346,6 +406,19 @@ footer p {margin-top:12px;font-size:11px;letter-spacing:1px}
       <h3>Manutenção</h3>
       <p>Cuidado e atenção para manter seu design.</p>
     </article>
+  </div>
+</section>
+
+<!-- GALERIA PÚBLICA -->
+<section class="gallery" id="galeria">
+  <div class="kicker">NOSSO TRABALHO</div>
+  <h2>Galeria de beleza</h2>
+  <p class="gallery-intro">
+    Alguns resultados dos nossos cuidados, feitos com carinho e delicadeza.
+  </p>
+
+  <div id="galeriaFotos" class="gallery-grid">
+    <p class="gallery-empty">Carregando fotos...</p>
   </div>
 </section>
 
@@ -411,6 +484,53 @@ const SUPABASE_KEY = "sb_publishable_o9oit1hipzi18_UjCpXWwg_WsRuG67p";
 
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+/* GALERIA: CARREGAR FOTOS PUBLICADAS PELO ADMIN */
+async function carregarGaleria() {
+  const galeria = document.getElementById("galeriaFotos");
+  galeria.replaceChildren();
+
+  const { data, error } = await db
+    .from("gallery_photos")
+    .select("id,image_url,caption,created_at")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    const aviso = document.createElement("p");
+    aviso.className = "gallery-empty";
+    aviso.textContent = "Não foi possível carregar as fotos no momento.";
+    galeria.appendChild(aviso);
+    console.error("Erro na galeria:", error);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    const aviso = document.createElement("p");
+    aviso.className = "gallery-empty";
+    aviso.textContent = "Em breve, novidades por aqui. Estamos preparando nossa galeria!";
+    galeria.appendChild(aviso);
+    return;
+  }
+
+  data.forEach(foto => {
+    const card = document.createElement("article");
+    card.className = "gallery-card";
+
+    const imagem = document.createElement("img");
+    imagem.src = foto.image_url;
+    imagem.alt = foto.caption || "Trabalho Sara Neves Brow Studio";
+    imagem.loading = "lazy";
+
+    const legenda = document.createElement("p");
+    legenda.textContent = foto.caption || "Sara Neves Brow Studio";
+
+    card.append(imagem, legenda);
+    galeria.appendChild(card);
+  });
+}
+
+carregarGaleria();
+
+/* AGENDAMENTOS */
 const form = document.getElementById("formAgendamento");
 const mensagem = document.getElementById("mensagem");
 const botao = document.getElementById("botaoEnviar");
@@ -439,12 +559,10 @@ function minutosDoHorario(horario) {
 function gerarHorarios() {
   const horarios = [];
 
-  // Manhã: 07h às 11h
   for (let minutos = 7 * 60; minutos + DURACAO <= 11 * 60; minutos += DURACAO) {
     horarios.push(minutos);
   }
 
-  // Tarde: 13h às 20h
   for (let minutos = 13 * 60; minutos + DURACAO <= 20 * 60; minutos += DURACAO) {
     horarios.push(minutos);
   }
@@ -487,27 +605,22 @@ async function carregarHorarios() {
     const ehHoje = data === dataLocal();
     const minutosAgora = agora.getHours() * 60 + agora.getMinutes();
 
-    const horarios = gerarHorarios();
-
-    horariosDisponiveis = horarios.filter(horario => {
+    horariosDisponiveis = gerarHorarios().filter(horario => {
       const inicio = minutosDoHorario(horario);
       const fim = inicio + DURACAO;
 
       if (ehHoje && inicio <= minutosAgora) return false;
 
-      const conflito = (ocupados || []).some(item => {
+      return !(ocupados || []).some(item => {
         const ocupadoInicio = minutosDoHorario(item.horario);
         const ocupadoFim = ocupadoInicio + Number(item.duracao || DURACAO);
-
         return inicio < ocupadoFim && fim > ocupadoInicio;
       });
-
-      return !conflito;
     });
 
     campoHorario.innerHTML = "";
 
-    if (horariosDisponiveis.length === 0) {
+    if (!horariosDisponiveis.length) {
       campoHorario.innerHTML = '<option value="">Nenhum horário disponível</option>';
       mensagem.textContent = "Não há horários livres nessa data. Escolha outro dia.";
       return;
@@ -558,7 +671,6 @@ form.addEventListener("submit", async event => {
   mensagem.textContent = "";
 
   try {
-    // Consulta novamente antes de salvar para reduzir conflitos.
     const { data: ocupados, error: erroConsulta } = await db.rpc(
       "horarios_ocupados",
       { p_data: data }
@@ -572,7 +684,6 @@ form.addEventListener("submit", async event => {
     const conflito = (ocupados || []).some(item => {
       const ocupadoInicio = minutosDoHorario(item.horario);
       const ocupadoFim = ocupadoInicio + Number(item.duracao || DURACAO);
-
       return inicio < ocupadoFim && fim > ocupadoInicio;
     });
 
@@ -603,7 +714,6 @@ form.addEventListener("submit", async event => {
       `Serviço: ${servico}`,
       `Data: ${data}`,
       `Horário: ${horario}`,
-      "Duração aproximada: 40 minutos",
       "",
       "Aguardo a confirmação!"
     ].join("\n");
@@ -629,4 +739,5 @@ form.addEventListener("submit", async event => {
 </script>
 
 </body>
-                                                                                                 </html>
+    </html>
+  
