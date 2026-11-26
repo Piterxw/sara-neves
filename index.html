@@ -110,7 +110,6 @@ footer a{display:inline-block;margin-top:13px;color:#eee3d7;font-size:11px}
   <a class="float-link" href="#galeria" data-view="gallery" aria-label="Galeria">▧<span>Galeria</span></a>
   <a class="float-link" href="#avaliacoes" data-view="reviews" aria-label="Avaliações">★<span>Avaliações</span></a>
   <a class="float-link" href="#agendar" data-view="booking" aria-label="Agendar">♡<span>Agendar</span></a>
-  <a class="float-link" href="admin.html" aria-label="Área administrativa">♙<span>ADM</span></a>
 </nav>
 
 <main>
@@ -134,9 +133,10 @@ footer a{display:inline-block;margin-top:13px;color:#eee3d7;font-size:11px}
     <article class="tile"><span>★</span><h3>Experiências reais</h3><p>Leia avaliações e compartilhe sua experiência.</p><button class="secondary-btn" data-open="reviews">Ver avaliações</button></article>
   </div>
   <section class="contact">
-    <div class="kicker">VAMOS CONVERSAR?</div><h2>Seu próximo cuidado começa aqui.</h2>
-    <p>Entre em contato pelo nosso WhatsApp.</p>
-    <a class="primary-btn" href="https://wa.me/5528999115294" target="_blank" rel="noopener">Conversar pelo WhatsApp</a>
+    <div class="kicker">RESERVE SEU MOMENTO</div>
+    <h2>Agende seu horário</h2>
+    <p>Escolha o melhor dia e horário para seu atendimento.</p>
+    <button class="primary-btn" type="button" data-open="booking">Agendar meu horário</button>
   </section>
 </section>
 
@@ -194,7 +194,6 @@ footer a{display:inline-block;margin-top:13px;color:#eee3d7;font-size:11px}
 <footer>
   <div class="logo">SARA NEVES<small>BROW STUDIO</small></div>
   <p>BELEZA EM CADA DETALHE · © 2026 SARA NEVES</p>
-  <a href="admin.html">Acesso administrativo</a>
 </footer>
 
 <script>
@@ -266,90 +265,76 @@ async function carregarServicosPublicos(){
   }catch(error){
     console.error("Erro ao carregar serviços:",error);
     seletor.innerHTML='<option value="">Erro ao carregar serviços</option>';
-    cards.innerHTML='<p class="empty">Não foi possível carregar os serviços. Tente novamente mais tarde.</p>';
-    preco.textContent="Não foi possível consultar os preços.";
+    cards.innerHTML='<p class="empty">Não foi possível carregar os serviços no momento.</p>';
   }
 }
 
-document.getElementById("servico").addEventListener("change",()=>{
-  const item=servicosAtivos.find(s=>s.id===document.getElementById("servico").value);
-  document.getElementById("precoSelecionado").textContent=item
-    ? `Valor do serviço: ${formatarMoeda(item.price)}`
-    : "Selecione um serviço para ver o preço.";
-});
-
-/* GALERIA */
+/* CARREGAR GALERIA */
 async function carregarGaleria(){
-  const galeria=document.getElementById("galeriaFotos");
-  galeria.replaceChildren();
+  const galeria=document.getElementById("galleryGrid");
+
+  if(!galeria) return;
 
   try{
     const {data,error}=await db
       .from("gallery_photos")
-      .select("id,image_url,caption,created_at")
+      .select("*")
       .order("created_at",{ascending:false});
 
-    if(error)throw error;
+    if(error) throw error;
 
-    if(!data||!data.length){
-      galeria.innerHTML='<p class="empty">Em breve, novidades por aqui. Estamos preparando nossa galeria!</p>';
+    galeria.innerHTML="";
+
+    if(!data || data.length===0){
+      galeria.innerHTML='<p class="empty">Em breve teremos fotos por aqui.</p>';
       return;
     }
 
     data.forEach(foto=>{
-      const card=document.createElement("article");
-      card.className="gallery-card";
+      const item=document.createElement("div");
+      item.className="gallery-item";
 
-      const img=document.createElement("img");
-      img.src=foto.image_url;
-      img.alt=foto.caption||"Trabalho Sara Neves Brow Studio";
-      img.loading="lazy";
+      const imagem=document.createElement("img");
+      imagem.src=foto.image_url;
+      imagem.alt=foto.caption || "Foto do estúdio";
+      imagem.loading="lazy";
 
-      const legenda=document.createElement("p");
-      legenda.textContent=foto.caption||"Sara Neves Brow Studio";
+      item.appendChild(imagem);
 
-      card.append(img,legenda);
-      galeria.appendChild(card);
+      if(foto.caption){
+        const legenda=document.createElement("p");
+        legenda.textContent=foto.caption;
+        item.appendChild(legenda);
+      }
+
+      galeria.appendChild(item);
     });
+
   }catch(error){
-    console.error("Erro na galeria:",error);
-    galeria.innerHTML='<p class="empty">Não foi possível carregar as fotos no momento.</p>';
+    console.error("Erro ao carregar galeria:",error);
+    galeria.innerHTML='<p class="empty">Não foi possível carregar a galeria.</p>';
   }
 }
 
 /* AVALIAÇÕES */
-let notaSelecionada=0;
-
-const estrelas=document.querySelectorAll(".review-star");
-const formularioAvaliacao=document.getElementById("formAvaliacao");
-const mensagemAvaliacao=document.getElementById("mensagemAvaliacao");
-
-estrelas.forEach(estrela=>estrela.addEventListener("click",()=>{
-  notaSelecionada=Number(estrela.dataset.rating);
-
-  estrelas.forEach(item=>{
-    const nota=Number(item.dataset.rating);
-    item.textContent=nota<=notaSelecionada?"★":"☆";
-    item.classList.toggle("selected",nota<=notaSelecionada);
-    item.setAttribute("aria-pressed",nota===notaSelecionada?"true":"false");
-  });
-}));
-
 async function carregarAvaliacoes(){
-  const lista=document.getElementById("avaliacoesPublicadas");
-  lista.replaceChildren();
+  const lista=document.getElementById("reviewsList");
+
+  if(!lista) return;
 
   try{
     const {data,error}=await db
       .from("reviews")
-      .select("id,customer_name,rating,comment,created_at")
+      .select("*")
       .eq("status","approved")
       .order("created_at",{ascending:false});
 
-    if(error)throw error;
+    if(error) throw error;
 
-    if(!data||!data.length){
-      lista.innerHTML='<p class="empty">Ainda não temos avaliações publicadas. Seja a primeira pessoa a avaliar!</p>';
+    lista.innerHTML="";
+
+    if(!data || data.length===0){
+      lista.innerHTML='<p class="empty">Seja a primeira pessoa a avaliar nosso atendimento.</p>';
       return;
     }
 
@@ -357,325 +342,246 @@ async function carregarAvaliacoes(){
       const card=document.createElement("article");
       card.className="review-card";
 
-      const nota=document.createElement("div");
-      nota.className="stars";
-      nota.textContent="★".repeat(avaliacao.rating)+"☆".repeat(5-avaliacao.rating);
-
       const nome=document.createElement("h3");
       nome.textContent=avaliacao.customer_name;
+
+      const estrelas=document.createElement("div");
+      estrelas.className="review-rating";
+      estrelas.textContent="★".repeat(avaliacao.rating)+"☆".repeat(5-avaliacao.rating);
 
       const comentario=document.createElement("p");
       comentario.textContent=avaliacao.comment;
 
-      card.append(nota,nome,comentario);
+      card.append(nome,estrelas,comentario);
       lista.appendChild(card);
     });
+
   }catch(error){
     console.error("Erro ao carregar avaliações:",error);
     lista.innerHTML='<p class="empty">Não foi possível carregar as avaliações.</p>';
   }
 }
 
-formularioAvaliacao.addEventListener("submit",async event=>{
-  event.preventDefault();
+/* ENVIAR AVALIAÇÃO */
+let notaSelecionada=0;
 
-  const nome=document.getElementById("nomeAvaliacao").value.trim();
-  const comentario=document.getElementById("comentarioAvaliacao").value.trim();
+const estrelasFormulario=document.querySelectorAll(".review-star");
 
-  if(!nome||!comentario||notaSelecionada<1||notaSelecionada>5){
-    mensagemAvaliacao.textContent="Preencha seu nome, escolha as estrelas e escreva seu comentário.";
-    return;
-  }
+estrelasFormulario.forEach(estrela=>{
+  estrela.addEventListener("click",()=>{
+    notaSelecionada=Number(estrela.dataset.rating);
 
-  const botao=document.getElementById("botaoAvaliacao");
-  botao.disabled=true;
-  botao.textContent="ENVIANDO...";
-
-  try{
-    const {error}=await db.from("reviews").insert([{
-      customer_name:nome,
-      rating:notaSelecionada,
-      comment:comentario,
-      status:"pending"
-    }]);
-
-    if(error)throw error;
-
-    mensagemAvaliacao.textContent="Avaliação enviada! Ela aparecerá no site depois da aprovação da Sara.";
-
-    formularioAvaliacao.reset();
-    notaSelecionada=0;
-
-    estrelas.forEach(estrela=>{
-      estrela.textContent="☆";
-      estrela.classList.remove("selected");
-      estrela.setAttribute("aria-pressed","false");
+    estrelasFormulario.forEach(item=>{
+      const nota=Number(item.dataset.rating);
+      item.classList.toggle("active",nota<=notaSelecionada);
     });
-
-  }catch(error){
-    console.error("Erro ao enviar avaliação:",error);
-    mensagemAvaliacao.textContent="Não foi possível enviar sua avaliação. Tente novamente.";
-  }finally{
-    botao.disabled=false;
-    botao.textContent="Enviar avaliação";
-  }
+  });
 });
 
-/* HORÁRIOS E AGENDAMENTO */
-const form=document.getElementById("formAgendamento");
-const mensagem=document.getElementById("mensagem");
-const botao=document.getElementById("botaoEnviar");
-const campoData=document.getElementById("data");
-const campoHorario=document.getElementById("horario");
-const pixBox=document.getElementById("pixBox");
+const formularioAvaliacao=document.getElementById("formAvaliacao");
 
-function dataLocal(){
-  const agora=new Date();
-  return [
-    agora.getFullYear(),
-    String(agora.getMonth()+1).padStart(2,"0"),
-    String(agora.getDate()).padStart(2,"0")
-  ].join("-");
-}
+if(formularioAvaliacao){
+  formularioAvaliacao.addEventListener("submit",async(event)=>{
+    event.preventDefault();
 
-campoData.min=dataLocal();
+    const nome=document.getElementById("reviewName").value.trim();
+    const comentario=document.getElementById("reviewComment").value.trim();
+    const mensagem=document.getElementById("mensagemAvaliacao");
 
-function minutosDoHorario(horario){
-  const partes=horario.split(":").map(Number);
-  return partes[0]*60+partes[1];
-}
-
-function gerarHorarios(){
-  const horarios=[];
-
-  for(let minutos=7*60;minutos+DURACAO<=11*60;minutos+=DURACAO){
-    horarios.push(minutos);
-  }
-
-  for(let minutos=13*60;minutos+DURACAO<=20*60;minutos+=DURACAO){
-    horarios.push(minutos);
-  }
-
-  return horarios.map(m=>
-    `${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}`
-  );
-}
-
-async function carregarHorarios(){
-  const data=campoData.value;
-
-  campoHorario.innerHTML='<option value="">Carregando horários...</option>';
-  campoHorario.disabled=true;
-
-  if(!data){
-    campoHorario.innerHTML='<option value="">Primeiro escolha a data</option>';
-    return;
-  }
-
-  if(data<dataLocal()){
-    campoHorario.innerHTML='<option value="">Escolha uma data válida</option>';
-    return;
-  }
-
-  mensagem.textContent="";
-
-  try{
-    const {data:ocupados,error}=await db.rpc(
-      "horarios_ocupados",
-      {p_data:data}
-    );
-
-    if(error)throw error;
-
-    const agora=new Date();
-    const ehHoje=data===dataLocal();
-    const minutosAgora=agora.getHours()*60+agora.getMinutes();
-
-    const livres=gerarHorarios().filter(horario=>{
-      const inicio=minutosDoHorario(horario);
-      const fim=inicio+DURACAO;
-
-      if(ehHoje&&inicio<=minutosAgora)return false;
-
-      return !(ocupados||[]).some(item=>{
-        const ocupadoInicio=minutosDoHorario(item.horario);
-        const ocupadoFim=ocupadoInicio+Number(item.duracao||DURACAO);
-
-        return inicio<ocupadoFim&&fim>ocupadoInicio;
-      });
-    });
-
-    campoHorario.innerHTML="";
-
-    if(!livres.length){
-      campoHorario.innerHTML='<option value="">Nenhum horário disponível</option>';
-      mensagem.textContent="Não há horários livres nessa data. Escolha outro dia.";
+    if(!nome || !comentario || notaSelecionada===0){
+      mensagem.textContent="Preencha seu nome, comentário e selecione as estrelas.";
       return;
     }
 
-    campoHorario.innerHTML='<option value="">Selecione um horário</option>';
+    try{
+      const {error}=await db.from("reviews").insert([{
+        customer_name:nome,
+        rating:notaSelecionada,
+        comment:comentario,
+        status:"pending"
+      }]);
 
-    livres.forEach(horario=>{
-      const option=document.createElement("option");
-      option.value=horario;
-      option.textContent=horario;
-      campoHorario.appendChild(option);
+      if(error) throw error;
+
+      mensagem.textContent="Avaliação enviada! Obrigado pelo carinho.";
+      formularioAvaliacao.reset();
+      notaSelecionada=0;
+
+      estrelasFormulario.forEach(item=>item.classList.remove("active"));
+
+    }catch(error){
+      console.error("Erro ao enviar avaliação:",error);
+      mensagem.textContent="Não foi possível enviar sua avaliação. Tente novamente.";
+    }
+  });
+}
+
+/* HORÁRIOS */
+async function carregarHorarios(data){
+  const seletorHorario=document.getElementById("appointmentTime");
+
+  if(!seletorHorario) return;
+
+  seletorHorario.innerHTML='<option value="">Carregando horários...</option>';
+
+  try{
+    const {data:ocupados,error}=await db.rpc("horarios_ocupados",{
+      p_data:data
     });
 
-    campoHorario.disabled=false;
+    if(error) throw error;
+
+    const horarios=[];
+
+    function adicionarHorarios(inicio,fim){
+      let [hora,minuto]=inicio.split(":").map(Number);
+      const [horaFim,minutoFim]=fim.split(":").map(Number);
+
+      while(hora<horaFim || (hora===horaFim && minuto<minutoFim)){
+        horarios.push(
+          String(hora).padStart(2,"0")+":"+
+          String(minuto).padStart(2,"0")
+        );
+
+        minuto+=40;
+
+        if(minuto>=60){
+          hora++;
+          minuto-=60;
+        }
+      }
+    }
+
+    adicionarHorarios("07:00","11:00");
+    adicionarHorarios("13:00","20:00");
+
+    const listaOcupados=(ocupados || []).map(item=>
+      String(item.horario).slice(0,5)
+    );
+
+    seletorHorario.innerHTML='<option value="">Escolha um horário</option>';
+
+    horarios.forEach(horario=>{
+      if(!listaOcupados.includes(horario)){
+        const option=document.createElement("option");
+        option.value=horario;
+        option.textContent=horario;
+        seletorHorario.appendChild(option);
+      }
+    });
+
+    if(seletorHorario.options.length===1){
+      seletorHorario.innerHTML='<option value="">Não há horários disponíveis</option>';
+    }
 
   }catch(error){
     console.error("Erro ao carregar horários:",error);
-    campoHorario.innerHTML='<option value="">Erro ao carregar horários</option>';
-    mensagem.textContent="Não foi possível consultar os horários. Atualize a página e tente novamente.";
+    seletorHorario.innerHTML='<option value="">Erro ao carregar horários</option>';
   }
 }
 
-campoData.addEventListener("change",carregarHorarios);
-campoData.addEventListener("input",carregarHorarios);
+/* ATUALIZAR HORÁRIOS AO ESCOLHER DATA */
+const campoData=document.getElementById("appointmentDate");
 
-form.addEventListener("submit",async event=>{
-  event.preventDefault();
+if(campoData){
+  campoData.min=new Date().toISOString().split("T")[0];
 
-  pixBox.style.display="none";
-  mensagem.textContent="";
+  campoData.addEventListener("change",()=>{
+    if(campoData.value){
+      carregarHorarios(campoData.value);
+    }
+  });
+}
 
-  const nome=document.getElementById("nome").value.trim();
-  const telefone=document.getElementById("telefone").value.trim();
-  const data=campoData.value;
-  const horario=campoHorario.value;
-  const servicoId=document.getElementById("servico").value;
+/* ATUALIZAR PREÇO DO SERVIÇO */
+const seletorServico=document.getElementById("appointmentService");
 
-  const servicoSelecionado=servicosAtivos.find(item=>item.id===servicoId);
-
-  if(!nome||!telefone||!data||!horario||!servicoSelecionado){
-    mensagem.textContent="Preencha todos os campos e escolha um horário disponível.";
-    return;
-  }
-
-  if(data<dataLocal()){
-    mensagem.textContent="Escolha uma data válida.";
-    return;
-  }
-
-  const servico=servicoSelecionado.name;
-  const precoServico=Number(servicoSelecionado.price);
-
-  if(!Number.isFinite(precoServico)||precoServico<=0){
-    mensagem.textContent="O preço deste serviço não está configurado corretamente. Entre em contato pelo WhatsApp.";
-    return;
-  }
-
-  botao.disabled=true;
-  botao.textContent="ENVIANDO SOLICITAÇÃO...";
-
-  try{
-    const {data:ocupados,error:erroConsulta}=await db.rpc(
-      "horarios_ocupados",
-      {p_data:data}
+if(seletorServico){
+  seletorServico.addEventListener("change",()=>{
+    const servico=servicosAtivos.find(item=>
+      String(item.id)===String(seletorServico.value)
     );
 
-    if(erroConsulta)throw erroConsulta;
+    const campoPreco=document.getElementById("appointmentPrice");
 
-    const inicioEscolhido=minutosDoHorario(horario);
-    const fimEscolhido=inicioEscolhido+DURACAO;
+    if(campoPreco){
+      campoPreco.textContent=servico
+        ?formatarMoeda(servico.price)
+        :"";
+    }
+  });
+}
 
-    const conflito=(ocupados||[]).some(item=>{
-      const inicioOcupado=minutosDoHorario(item.horario);
-      const fimOcupado=inicioOcupado+Number(item.duracao||DURACAO);
+/* FINALIZAR AGENDAMENTO */
+const formularioAgendamento=document.getElementById("appointmentForm");
 
-      return inicioEscolhido<fimOcupado&&fimEscolhido>inicioOcupado;
-    });
+if(formularioAgendamento){
+  formularioAgendamento.addEventListener("submit",async(event)=>{
+    event.preventDefault();
 
-    if(conflito){
-      mensagem.textContent="Esse horário acabou de ser ocupado. Escolha outro horário.";
-      await carregarHorarios();
+    const nome=document.getElementById("customerName").value.trim();
+    const telefone=document.getElementById("customerPhone").value.trim();
+    const servicoId=seletorServico.value;
+    const data=document.getElementById("appointmentDate").value;
+    const horario=document.getElementById("appointmentTime").value;
+    const mensagem=document.getElementById("appointmentMessage");
+
+    const servico=servicosAtivos.find(item=>
+      String(item.id)===String(servicoId)
+    );
+
+    if(!nome || !telefone || !servico || !data || !horario){
+      mensagem.textContent="Preencha todos os campos do agendamento.";
       return;
     }
 
-    const {error}=await db.from("appointments").insert([{
-      customer_name:nome,
-      customer_phone:telefone,
-      service:servico,
-      service_price:precoServico,
-      appointment_date:data,
-      appointment_time:horario,
-      status:"pending"
-    }]);
+    try{
+      const {error}=await db.from("appointments").insert([{
+        customer_name:nome,
+        customer_phone:telefone,
+        service:servico.name,
+        service_price:Number(servico.price),
+        appointment_date:data,
+        appointment_time:horario,
+        status:"pending"
+      }]);
 
-    if(error)throw error;
+      if(error) throw error;
 
-    const dataFormatada=data.split("-").reverse().join("/");
+      mensagem.textContent="Agendamento enviado com sucesso!";
 
-    const textoWhatsApp=`Olá, Sara! Gostaria de solicitar um agendamento.
+      const texto=
+        "Olá! Acabei de solicitar um agendamento.%0A"+
+        "Nome: "+encodeURIComponent(nome)+"%0A"+
+        "Telefone: "+encodeURIComponent(telefone)+"%0A"+
+        "Serviço: "+encodeURIComponent(servico.name)+"%0A"+
+        "Valor: "+encodeURIComponent(formatarMoeda(servico.price))+"%0A"+
+        "Data: "+encodeURIComponent(data)+"%0A"+
+        "Horário: "+encodeURIComponent(horario);
 
-Nome: ${nome}
-WhatsApp: ${telefone}
-Serviço: ${servico}
-Valor: ${formatarMoeda(precoServico)}
-Data: ${dataFormatada}
-Horário: ${horario}
+      window.open(
+        "https://wa.me/"+WHATSAPP_SARA+"?text="+texto,
+        "_blank"
+      );
 
-Aguardo a confirmação do horário.`;
+      formularioAgendamento.reset();
 
-    const linkWhatsApp=`https://wa.me/${WHATSAPP_SARA}?text=${encodeURIComponent(textoWhatsApp)}`;
+      if(campoData) campoData.min=new Date().toISOString().split("T")[0];
 
-    document.getElementById("pixValor").textContent=formatarMoeda(precoServico);
+      const campoPreco=document.getElementById("appointmentPrice");
+      if(campoPreco) campoPreco.textContent="";
 
-    const textoComprovante=`Olá, Sara! Estou enviando o comprovante do Pix referente ao agendamento.
+      if(campoData) campoData.dispatchEvent(new Event("change"));
 
-Nome: ${nome}
-Serviço: ${servico}
-Valor: ${formatarMoeda(precoServico)}
-Data: ${dataFormatada}
-Horário: ${horario}
+    }catch(error){
+      console.error("Erro ao realizar agendamento:",error);
+      mensagem.textContent="Não foi possível realizar o agendamento. Tente novamente.";
+    }
+  });
+}
 
-Segue o comprovante.`;
-
-    document.getElementById("enviarComprovante").href=
-      `https://wa.me/${WHATSAPP_SARA}?text=${encodeURIComponent(textoComprovante)}`;
-
-    mensagem.textContent="Solicitação registrada! Agora você pode copiar a chave Pix e enviar os dados pelo WhatsApp.";
-
-    pixBox.style.display="block";
-    tocarSom("confirmacao");
-    window.open(linkWhatsApp,"_blank");
-
-    document.getElementById("nome").value="";
-    document.getElementById("telefone").value="";
-    document.getElementById("servico").value="";
-    document.getElementById("precoSelecionado").textContent="Selecione um serviço para ver o preço.";
-
-    campoData.value="";
-    campoHorario.innerHTML='<option value="">Primeiro escolha a data</option>';
-    campoHorario.disabled=true;
-
-  }catch(error){
-    console.error("Erro ao registrar agendamento:",error);
-    mensagem.textContent="Não foi possível registrar o agendamento. Tente novamente ou entre em contato pelo WhatsApp.";
-  }finally{
-    botao.disabled=false;
-    botao.textContent="Solicitar agendamento";
-  }
-});
-
-document.getElementById("copiarPix").addEventListener("click",async()=>{
-  try{
-    await navigator.clipboard.writeText(CHAVE_PIX);
-  }catch(error){
-    const temporario=document.createElement("textarea");
-    temporario.value=CHAVE_PIX;
-    document.body.appendChild(temporario);
-    temporario.select();
-    document.execCommand("copy");
-    temporario.remove();
-  }
-
-  document.getElementById("copiarPix").textContent="Chave Pix copiada!";
-});
-
-/* INICIALIZAÇÃO */
-carregarServicosPublicos();
+/* INICIAR SITE */
+carregarServicos();
 carregarGaleria();
 carregarAvaliacoes();
 
