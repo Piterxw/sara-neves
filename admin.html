@@ -17,8 +17,8 @@ main{max-width:950px;margin:30px auto;padding:0 16px}
 input,select,button{font:inherit;padding:12px;border-radius:8px;border:1px solid #ddd;width:100%;margin:6px 0}
 button{background:#80634f;color:white;border:0;font-weight:600;cursor:pointer}
 button:disabled{opacity:.5}
-.tabs{display:flex;gap:10px;margin-bottom:18px}
-.tabs button{flex:1}
+.tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.tabs button{flex:1;min-width:100px;font-size:13px}
 .secondary{background:#e9dfd5;color:#49382f}
 .danger{background:#a34e45}
 .hidden{display:none!important}
@@ -30,6 +30,18 @@ button:disabled{opacity:.5}
 .photo button{margin:0;border-radius:0}
 #mensagem,#erroLogin{padding:10px 0;font-size:14px}
 .status{font-size:13px;color:#80634f}
+.servico{border:1px solid #eadfd5;padding:15px;border-radius:10px;margin:12px 0}
+.servico label{font-size:13px;font-weight:600}
+.servico .linha{display:flex;gap:10px;align-items:center}
+.servico .linha input{min-width:0}
+.servico .linha .preco{max-width:120px}
+.servico .ativo{display:flex;align-items:center;gap:8px;margin:8px 0}
+.servico .ativo input{width:auto;margin:0}
+.preco-texto{color:#80634f;font-size:13px}
+@media(max-width:480px){
+  .servico .linha{display:block}
+  .servico .linha .preco{max-width:none}
+}
 </style>
 </head>
 
@@ -54,6 +66,7 @@ button:disabled{opacity:.5}
 <div class="tabs">
 <button id="abaAgendamentos">Agendamentos</button>
 <button id="abaGaleria" class="secondary">Galeria de fotos</button>
+<button id="abaServicos" class="secondary">Preços e Serviços</button>
 </div>
 
 <div id="mensagem" role="status"></div>
@@ -86,6 +99,28 @@ button:disabled{opacity:.5}
 
 <h3>Fotos publicadas</h3>
 <div id="listaFotos">Carregando...</div>
+</section>
+
+<section id="areaServicos" class="card hidden">
+<h2>Preços e Serviços</h2>
+<p>Cadastre serviços e altere os valores que serão utilizados no site.</p>
+
+<form id="formServico">
+<label for="novoNome"><strong>Nome do serviço</strong></label>
+<input id="novoNome" type="text" maxlength="100" placeholder="Ex.: Design de sobrancelhas" required>
+
+<label for="novoPreco"><strong>Preço em reais (R$)</strong></label>
+<input id="novoPreco" type="number" min="0" step="0.01" placeholder="Ex.: 25,00" required>
+
+<button id="botaoNovoServico" type="submit">Adicionar serviço</button>
+</form>
+
+<hr style="border:0;border-top:1px solid #eee;margin:22px 0">
+
+<h3>Serviços cadastrados</h3>
+<p class="preco-texto">Edite os campos e toque em salvar. Serviços desativados não ficam disponíveis para as clientes.</p>
+
+<div id="listaServicos">Carregando serviços...</div>
 </section>
 
 <button id="sair" class="danger">Sair do painel</button>
@@ -164,6 +199,7 @@ document.getElementById("formLogin").addEventListener("submit", async (e) => {
     erro.textContent = "";
     carregarAgendamentos();
     carregarFotos();
+    carregarServicos();
   }
 });
 
@@ -172,21 +208,32 @@ document.getElementById("sair").addEventListener("click", async () => {
   mostrarLogin();
 });
 
-document.getElementById("abaAgendamentos").addEventListener("click", () => {
-  document.getElementById("areaAgendamentos").classList.remove("hidden");
-  document.getElementById("areaGaleria").classList.add("hidden");
-  document.getElementById("abaAgendamentos").classList.remove("secondary");
-  document.getElementById("abaGaleria").classList.add("secondary");
-  carregarAgendamentos();
-});
+function mostrarAba(aba) {
+  const areas = {
+    agendamentos: "areaAgendamentos",
+    galeria: "areaGaleria",
+    servicos: "areaServicos"
+  };
 
-document.getElementById("abaGaleria").addEventListener("click", () => {
-  document.getElementById("areaGaleria").classList.remove("hidden");
-  document.getElementById("areaAgendamentos").classList.add("hidden");
-  document.getElementById("abaGaleria").classList.remove("secondary");
-  document.getElementById("abaAgendamentos").classList.add("secondary");
-  carregarFotos();
-});
+  const botoes = {
+    agendamentos: "abaAgendamentos",
+    galeria: "abaGaleria",
+    servicos: "abaServicos"
+  };
+
+  Object.keys(areas).forEach(nome => {
+    document.getElementById(areas[nome]).classList.toggle("hidden", nome !== aba);
+    document.getElementById(botoes[nome]).classList.toggle("secondary", nome !== aba);
+  });
+
+  if (aba === "agendamentos") carregarAgendamentos();
+  if (aba === "galeria") carregarFotos();
+  if (aba === "servicos") carregarServicos();
+}
+
+document.getElementById("abaAgendamentos").addEventListener("click", () => mostrarAba("agendamentos"));
+document.getElementById("abaGaleria").addEventListener("click", () => mostrarAba("galeria"));
+document.getElementById("abaServicos").addEventListener("click", () => mostrarAba("servicos"));
 
 function formatarData(data) {
   if (!data) return "";
@@ -432,10 +479,159 @@ async function excluirFoto(foto) {
   carregarFotos();
 }
 
+/* PREÇOS E SERVIÇOS */
+
+async function carregarServicos() {
+  const lista = document.getElementById("listaServicos");
+  lista.textContent = "Carregando serviços...";
+
+  const { data, error } = await db
+    .from("services")
+    .select("*")
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    lista.textContent = "Erro ao carregar serviços: " + error.message;
+    return;
+  }
+
+  lista.replaceChildren();
+
+  if (!data || data.length === 0) {
+    lista.textContent = "Nenhum serviço cadastrado.";
+    return;
+  }
+
+  data.forEach(servico => {
+    const card = document.createElement("div");
+    card.className = "servico";
+
+    const nomeLabel = document.createElement("label");
+    nomeLabel.textContent = "Nome do serviço";
+
+    const nome = document.createElement("input");
+    nome.type = "text";
+    nome.maxLength = 100;
+    nome.value = servico.name;
+
+    const precoLabel = document.createElement("label");
+    precoLabel.textContent = "Preço (R$)";
+
+    const preco = document.createElement("input");
+    preco.className = "preco";
+    preco.type = "number";
+    preco.min = "0";
+    preco.step = "0.01";
+    preco.value = Number(servico.price).toFixed(2);
+
+    const ativoLinha = document.createElement("label");
+    ativoLinha.className = "ativo";
+
+    const ativo = document.createElement("input");
+    ativo.type = "checkbox";
+    ativo.checked = servico.active;
+
+    const ativoTexto = document.createElement("span");
+    ativoTexto.textContent = "Serviço ativo no site";
+
+    ativoLinha.append(ativo, ativoTexto);
+
+    const salvar = document.createElement("button");
+    salvar.textContent = "Salvar alterações";
+    salvar.addEventListener("click", () =>
+      salvarServico(servico.id, nome.value, preco.value, ativo.checked, salvar)
+    );
+
+    card.append(nomeLabel, nome, precoLabel, preco, ativoLinha, salvar);
+    lista.appendChild(card);
+  });
+}
+
+async function salvarServico(id, nome, preco, ativo, botao) {
+  nome = nome.trim();
+  const valor = Number(preco);
+
+  if (!nome) {
+    avisar("Digite o nome do serviço.");
+    return;
+  }
+
+  if (preco === "" || !Number.isFinite(valor) || valor < 0) {
+    avisar("Digite um preço válido.");
+    return;
+  }
+
+  botao.disabled = true;
+  avisar("Salvando serviço...");
+
+  const { error } = await db
+    .from("services")
+    .update({
+      name: nome,
+      price: valor,
+      active: ativo
+    })
+    .eq("id", id);
+
+  botao.disabled = false;
+
+  if (error) {
+    avisar("Erro ao salvar: " + error.message);
+    return;
+  }
+
+  avisar("Serviço atualizado com sucesso!");
+  carregarServicos();
+}
+
+document.getElementById("formServico").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const nome = document.getElementById("novoNome").value.trim();
+  const precoTexto = document.getElementById("novoPreco").value;
+  const preco = Number(precoTexto);
+  const botao = document.getElementById("botaoNovoServico");
+
+  if (!nome) {
+    avisar("Digite o nome do serviço.");
+    return;
+  }
+
+  if (precoTexto === "" || !Number.isFinite(preco) || preco < 0) {
+    avisar("Digite um preço válido.");
+    return;
+  }
+
+  botao.disabled = true;
+  avisar("Adicionando serviço...");
+
+  const { error } = await db
+    .from("services")
+    .insert({
+      name: nome,
+      price: preco,
+      active: true
+    });
+
+  botao.disabled = false;
+
+  if (error) {
+    avisar(error.code === "23505"
+      ? "Já existe um serviço com esse nome."
+      : "Erro ao adicionar: " + error.message);
+    return;
+  }
+
+  document.getElementById("formServico").reset();
+  avisar("Novo serviço adicionado!");
+  carregarServicos();
+});
+
 async function iniciar() {
   if (await verificarAdmin()) {
     carregarAgendamentos();
     carregarFotos();
+    carregarServicos();
   }
 }
 
@@ -443,4 +639,3 @@ iniciar();
 </script>
 </body>
   </html>
-  
