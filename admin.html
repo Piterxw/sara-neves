@@ -5,230 +5,114 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sara Neves | Administração</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
 
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  background: #f8f5f0;
-  color: #49382e;
-  font-family: 'DM Sans', sans-serif;
-}
-
-header {
-  background: #49382e;
-  color: #f8f1e9;
-  padding: 25px;
-  text-align: center;
-}
-
-header h1 {
-  font: 28px 'Playfair Display', serif;
-  letter-spacing: 2px;
-}
-
-header p {
-  font-size: 10px;
-  letter-spacing: 4px;
-  margin-top: 7px;
-}
-
-main {
-  max-width: 1000px;
-  margin: 35px auto;
-  padding: 0 18px;
-}
-
-h2 {
-  font: 32px 'Playfair Display', serif;
-  margin-bottom: 8px;
-}
-
-.subtitulo {
-  color: #89796c;
-  font-size: 14px;
-  margin-bottom: 28px;
-}
-
-#login, #painel {
-  background: white;
-  padding: 25px;
-  border: 1px solid #e9dfd2;
-  border-radius: 12px;
-}
-
-label {
-  display: block;
-  font-size: 12px;
-  margin: 16px 0 7px;
-}
-
-input, select {
-  width: 100%;
-  padding: 14px;
-  border: 1px solid #e3d6c9;
-  border-radius: 7px;
-  background: #fffdfa;
-  font: inherit;
-}
-
-button {
-  padding: 13px 18px;
-  border: none;
-  border-radius: 7px;
-  background: #725642;
-  color: white;
-  cursor: pointer;
-  font: inherit;
-}
-
-#login button {
-  width: 100%;
-  margin-top: 22px;
-}
-
-#mensagem {
-  margin-top: 15px;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.topo-painel {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.agendamento {
-  border: 1px solid #e9dfd2;
-  border-radius: 10px;
-  padding: 20px;
-  margin-top: 14px;
-  background: #fffdfa;
-}
-
-.agendamento h3 {
-  font: 21px 'Playfair Display', serif;
-  margin-bottom: 10px;
-}
-
-.detalhe {
-  font-size: 13px;
-  color: #79695c;
-  line-height: 1.9;
-}
-
-.status {
-  display: inline-block;
-  padding: 6px 10px;
-  margin: 12px 0;
-  border-radius: 30px;
-  background: #f1e6d8;
-  font-size: 11px;
-}
-
-.acoes {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-}
-
-.cancelar { background: #8d4e46; }
-.sair { background: transparent; color: white; border: 1px solid #bca995; }
-#lista { margin-top: 15px; }
-
-.oculto { display: none; }
-
-@media(min-width: 650px) {
-  #login { max-width: 430px; margin: auto; }
-}
+*{box-sizing:border-box}
+body{margin:0;background:#f8f4ef;color:#49382f;font-family:'DM Sans',sans-serif}
+header{background:#49382f;color:white;padding:24px;text-align:center}
+h1{font-family:'Playfair Display',serif;font-weight:500;margin:0}
+main{max-width:950px;margin:30px auto;padding:0 16px}
+.card{background:white;padding:22px;border-radius:14px;margin-bottom:20px;box-shadow:0 4px 20px #49382f12}
+input,select,button{font:inherit;padding:12px;border-radius:8px;border:1px solid #ddd;width:100%;margin:6px 0}
+button{background:#80634f;color:white;border:0;font-weight:600;cursor:pointer}
+button:disabled{opacity:.5}
+.tabs{display:flex;gap:10px;margin-bottom:18px}
+.tabs button{flex:1}
+.secondary{background:#e9dfd5;color:#49382f}
+.danger{background:#a34e45}
+.hidden{display:none!important}
+.item{border-bottom:1px solid #eee;padding:14px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.photo{border:1px solid #eee;border-radius:10px;overflow:hidden}
+.photo img{width:100%;height:150px;object-fit:cover;display:block}
+.photo p{padding:0 10px;overflow-wrap:anywhere}
+.photo button{margin:0;border-radius:0}
+#mensagem,#erroLogin{padding:10px 0;font-size:14px}
+.status{font-size:13px;color:#80634f}
 </style>
 </head>
 
 <body>
-
 <header>
-  <h1>SARA NEVES</h1>
-  <p>PAINEL ADMINISTRATIVO</p>
+<h1>Sara Neves</h1>
+<p>Painel administrativo</p>
 </header>
 
 <main>
-  <section id="login">
-    <h2>Bem-vinda</h2>
-    <p class="subtitulo">Entre para acessar os agendamentos.</p>
+<section id="login" class="card">
+<h2>Entrar no painel</h2>
+<form id="formLogin">
+<input id="email" type="email" placeholder="Seu e-mail" required>
+<input id="senha" type="password" placeholder="Sua senha" required>
+<button type="submit">Entrar</button>
+</form>
+<div id="erroLogin"></div>
+</section>
 
-    <form id="formLogin">
-      <label for="email">E-MAIL</label>
-      <input id="email" type="email" required placeholder="Seu e-mail">
+<section id="painel" class="hidden">
+<div class="tabs">
+<button id="abaAgendamentos">Agendamentos</button>
+<button id="abaGaleria" class="secondary">Galeria de fotos</button>
+</div>
 
-      <label for="senha">SENHA</label>
-      <input id="senha" type="password" required placeholder="Sua senha">
+<div id="mensagem" role="status"></div>
 
-      <button type="submit">Entrar no painel</button>
-    </form>
+<section id="areaAgendamentos" class="card">
+<h2>Agendamentos</h2>
+<select id="filtro">
+<option value="todos">Todos os agendamentos</option>
+<option value="pending">Pendentes</option>
+<option value="awaiting_payment">Aguardando pagamento</option>
+<option value="confirmed">Confirmados</option>
+<option value="cancelled">Cancelados</option>
+</select>
+<div id="listaAgendamentos">Carregando...</div>
+</section>
 
-    <p id="mensagem" role="status"></p>
-  </section>
+<section id="areaGaleria" class="card hidden">
+<h2>Galeria de fotos</h2>
+<p>Publique fotos dos trabalhos para aparecerem no site.</p>
 
-  <section id="painel" class="oculto">
-    <div class="topo-painel">
-      <div>
-        <h2>Agendamentos</h2>
-        <p class="subtitulo">Gerencie as solicitações dos clientes.</p>
-      </div>
-      <div class="acoes">
-        <button id="atualizar">Atualizar</button>
-        <button id="sair" class="cancelar">Sair</button>
-      </div>
-    </div>
+<form id="formFoto">
+<label for="foto"><strong>Escolher foto</strong></label>
+<input id="foto" type="file" accept="image/*" required>
 
-    <label for="filtro">FILTRAR AGENDAMENTOS</label>
-    <select id="filtro">
-      <option value="todos">Todos</option>
-      <option value="pending">Pendentes</option>
-      <option value="confirmed">Confirmados</option>
-      <option value="cancelled">Cancelados</option>
-      <option value="awaiting_payment">Aguardando pagamento</option>
-    </select>
+<label for="legenda"><strong>Legenda da foto</strong></label>
+<input id="legenda" type="text" maxlength="180" placeholder="Ex.: Design de sobrancelhas">
 
-    <div id="lista">Carregando...</div>
-  </section>
+<button id="botaoEnviar" type="submit">Publicar foto</button>
+</form>
+
+<h3>Fotos publicadas</h3>
+<div id="listaFotos">Carregando...</div>
+</section>
+
+<button id="sair" class="danger">Sair do painel</button>
+</section>
 </main>
 
 <script>
 const SUPABASE_URL = "https://upgthlpcnnskasemvzso.supabase.co";
 const SUPABASE_KEY = "sb_publishable_o9oit1hipzi18_UjCpXWwg_WsRuG67p";
-
-const db = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const login = document.getElementById("login");
 const painel = document.getElementById("painel");
 const mensagem = document.getElementById("mensagem");
-const lista = document.getElementById("lista");
 
-const nomesStatus = {
-  pending: "Pendente",
-  confirmed: "Confirmado",
-  cancelled: "Cancelado",
-  awaiting_payment: "Aguardando pagamento"
-};
-
-function mostrarPainel() {
-  login.classList.add("oculto");
-  painel.classList.remove("oculto");
+function avisar(texto) {
+  mensagem.textContent = texto;
 }
 
 function mostrarLogin() {
-  painel.classList.add("oculto");
-  login.classList.remove("oculto");
+  login.classList.remove("hidden");
+  painel.classList.add("hidden");
+}
+
+function mostrarPainel() {
+  login.classList.add("hidden");
+  painel.classList.remove("hidden");
 }
 
 async function verificarAdmin() {
@@ -239,31 +123,32 @@ async function verificarAdmin() {
     return false;
   }
 
-  const { data, error: adminError } = await db
+  const { data, error: erroAdmin } = await db
     .from("admin_users")
     .select("user_id")
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (adminError || !data) {
-    mensagem.textContent =
-      "Este usuário não tem autorização para acessar o painel.";
+  if (erroAdmin || !data) {
     await db.auth.signOut();
     mostrarLogin();
+    document.getElementById("erroLogin").textContent =
+      "Esta conta não tem permissão de administrador.";
     return false;
   }
 
   mostrarPainel();
-  await carregarAgendamentos();
   return true;
 }
 
 document.getElementById("formLogin").addEventListener("submit", async (e) => {
   e.preventDefault();
-  mensagem.textContent = "Verificando acesso...";
 
   const email = document.getElementById("email").value.trim();
   const senha = document.getElementById("senha").value;
+  const erro = document.getElementById("erroLogin");
+
+  erro.textContent = "Entrando...";
 
   const { error } = await db.auth.signInWithPassword({
     email,
@@ -271,60 +156,90 @@ document.getElementById("formLogin").addEventListener("submit", async (e) => {
   });
 
   if (error) {
-    mensagem.textContent = "Não foi possível entrar. Confira seus dados.";
+    erro.textContent = "Não foi possível entrar. Confira e-mail e senha.";
     return;
   }
 
-  await verificarAdmin();
+  if (await verificarAdmin()) {
+    erro.textContent = "";
+    carregarAgendamentos();
+    carregarFotos();
+  }
 });
 
+document.getElementById("sair").addEventListener("click", async () => {
+  await db.auth.signOut();
+  mostrarLogin();
+});
+
+document.getElementById("abaAgendamentos").addEventListener("click", () => {
+  document.getElementById("areaAgendamentos").classList.remove("hidden");
+  document.getElementById("areaGaleria").classList.add("hidden");
+  document.getElementById("abaAgendamentos").classList.remove("secondary");
+  document.getElementById("abaGaleria").classList.add("secondary");
+  carregarAgendamentos();
+});
+
+document.getElementById("abaGaleria").addEventListener("click", () => {
+  document.getElementById("areaGaleria").classList.remove("hidden");
+  document.getElementById("areaAgendamentos").classList.add("hidden");
+  document.getElementById("abaGaleria").classList.remove("secondary");
+  document.getElementById("abaAgendamentos").classList.add("secondary");
+  carregarFotos();
+});
+
+function formatarData(data) {
+  if (!data) return "";
+  const partes = data.split("-");
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
 async function carregarAgendamentos() {
+  const lista = document.getElementById("listaAgendamentos");
   lista.textContent = "Carregando agendamentos...";
 
-  const filtro = document.getElementById("filtro").value;
-
-  let consulta = db
+  const { data, error } = await db
     .from("appointments")
     .select("*")
     .order("appointment_date", { ascending: true })
     .order("appointment_time", { ascending: true });
-
-  if (filtro !== "todos") {
-    consulta = consulta.eq("status", filtro);
-  }
-
-  const { data, error } = await consulta;
 
   if (error) {
     lista.textContent = "Erro ao carregar agendamentos.";
     return;
   }
 
-  if (!data || data.length === 0) {
+  const filtro = document.getElementById("filtro").value;
+  const agendamentos = (data || []).filter(item =>
+    filtro === "todos" || item.status === filtro
+  );
+
+  lista.replaceChildren();
+
+  if (!agendamentos.length) {
     lista.textContent = "Nenhum agendamento encontrado.";
     return;
   }
 
-  lista.replaceChildren();
+  agendamentos.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "item";
 
-  data.forEach((item) => {
-    const card = document.createElement("article");
-    card.className = "agendamento";
-
-    const titulo = document.createElement("h3");
+    const titulo = document.createElement("strong");
     titulo.textContent = item.customer_name || "Cliente";
 
     const detalhes = document.createElement("p");
-    detalhes.className = "detalhe";
     detalhes.textContent =
-      `Serviço: ${item.service} | Data: ${item.appointment_date} | Horário: ${item.appointment_time} | WhatsApp: ${item.customer_phone}`;
+      `${item.service || ""} | ${formatarData(item.appointment_date)} | ${item.appointment_time || ""}`;
 
-    const status = document.createElement("span");
+    const telefone = document.createElement("p");
+    telefone.textContent = "Telefone: " + (item.customer_phone || "Não informado");
+
+    const status = document.createElement("p");
     status.className = "status";
-    status.textContent = nomesStatus[item.status] || item.status;
+    status.textContent = "Status: " + item.status;
 
-    const acoes = document.createElement("div");
-    acoes.className = "acoes";
+    div.append(titulo, detalhes, telefone, status);
 
     if (item.status !== "confirmed" && item.status !== "cancelled") {
       const confirmar = document.createElement("button");
@@ -332,53 +247,200 @@ async function carregarAgendamentos() {
       confirmar.addEventListener("click", () =>
         alterarStatus(item.id, "confirmed")
       );
-      acoes.append(confirmar);
-    }
 
-    if (item.status !== "cancelled") {
       const cancelar = document.createElement("button");
       cancelar.textContent = "Cancelar";
-      cancelar.className = "cancelar";
+      cancelar.className = "danger";
       cancelar.addEventListener("click", () =>
         alterarStatus(item.id, "cancelled")
       );
-      acoes.append(cancelar);
+
+      div.append(confirmar, cancelar);
     }
 
-    card.append(titulo, detalhes, status, acoes);
-    lista.append(card);
+    lista.appendChild(div);
   });
 }
 
 async function alterarStatus(id, status) {
+  avisar("Atualizando agendamento...");
+
   const { error } = await db
     .from("appointments")
     .update({ status })
     .eq("id", id);
 
   if (error) {
-    alert("Não foi possível atualizar o agendamento.");
+    avisar("Não foi possível atualizar o agendamento.");
     return;
   }
 
-  await carregarAgendamentos();
+  avisar("Agendamento atualizado!");
+  carregarAgendamentos();
 }
 
-document.getElementById("atualizar").addEventListener("click", carregarAgendamentos);
 document.getElementById("filtro").addEventListener("change", carregarAgendamentos);
 
-document.getElementById("sair").addEventListener("click", async () => {
-  await db.auth.signOut();
-  mostrarLogin();
+document.getElementById("formFoto").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const botao = document.getElementById("botaoEnviar");
+  const arquivo = document.getElementById("foto").files[0];
+  const legenda = document.getElementById("legenda").value.trim();
+
+  if (!arquivo) {
+    avisar("Escolha uma foto primeiro.");
+    return;
+  }
+
+  if (!arquivo.type.startsWith("image/")) {
+    avisar("Escolha um arquivo de imagem.");
+    return;
+  }
+
+  if (arquivo.size > 5 * 1024 * 1024) {
+    avisar("A foto precisa ter no máximo 5 MB.");
+    return;
+  }
+
+  const { data: { user } } = await db.auth.getUser();
+
+  if (!user) {
+    avisar("Sua sessão expirou. Entre novamente.");
+    mostrarLogin();
+    return;
+  }
+
+  botao.disabled = true;
+  avisar("Enviando foto...");
+
+  const extensao = arquivo.name.split(".").pop().toLowerCase();
+  const caminho = `${user.id}/${Date.now()}-${crypto.randomUUID()}.${extensao}`;
+
+  const { error: erroUpload } = await db.storage
+    .from("galeria-clientes")
+    .upload(caminho, arquivo, {
+      cacheControl: "3600",
+      upsert: false,
+      contentType: arquivo.type
+    });
+
+  if (erroUpload) {
+    avisar("Erro ao enviar foto: " + erroUpload.message);
+    botao.disabled = false;
+    return;
+  }
+
+  const { data: urlData } = db.storage
+    .from("galeria-clientes")
+    .getPublicUrl(caminho);
+
+  const { error: erroRegistro } = await db
+    .from("gallery_photos")
+    .insert({
+      image_url: urlData.publicUrl,
+      storage_path: caminho,
+      caption: legenda
+    });
+
+  if (erroRegistro) {
+    await db.storage.from("galeria-clientes").remove([caminho]);
+    avisar("A foto foi enviada, mas não foi publicada: " + erroRegistro.message);
+    botao.disabled = false;
+    return;
+  }
+
+  document.getElementById("formFoto").reset();
+  avisar("Foto publicada com sucesso!");
+  botao.disabled = false;
+  carregarFotos();
 });
 
-db.auth.onAuthStateChange((event, session) => {
-  if (event === "SIGNED_OUT") mostrarLogin();
-});
+async function carregarFotos() {
+  const lista = document.getElementById("listaFotos");
+  lista.textContent = "Carregando fotos...";
 
-verificarAdmin();
+  const { data, error } = await db
+    .from("gallery_photos")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    lista.textContent = "Erro ao carregar fotos.";
+    return;
+  }
+
+  lista.replaceChildren();
+
+  if (!data || !data.length) {
+    lista.textContent = "Nenhuma foto publicada ainda.";
+    return;
+  }
+
+  const grade = document.createElement("div");
+  grade.className = "grid";
+
+  data.forEach(foto => {
+    const card = document.createElement("div");
+    card.className = "photo";
+
+    const img = document.createElement("img");
+    img.src = foto.image_url;
+    img.alt = foto.caption || "Foto da galeria";
+    img.loading = "lazy";
+
+    const legenda = document.createElement("p");
+    legenda.textContent = foto.caption || "Sem legenda";
+
+    const excluir = document.createElement("button");
+    excluir.textContent = "Excluir foto";
+    excluir.className = "danger";
+    excluir.addEventListener("click", () => excluirFoto(foto));
+
+    card.append(img, legenda, excluir);
+    grade.appendChild(card);
+  });
+
+  lista.appendChild(grade);
+}
+
+async function excluirFoto(foto) {
+  if (!confirm("Deseja realmente excluir esta foto?")) return;
+
+  avisar("Excluindo foto...");
+
+  const { error: erroArquivo } = await db.storage
+    .from("galeria-clientes")
+    .remove([foto.storage_path]);
+
+  if (erroArquivo) {
+    avisar("Não foi possível excluir o arquivo: " + erroArquivo.message);
+    return;
+  }
+
+  const { error: erroRegistro } = await db
+    .from("gallery_photos")
+    .delete()
+    .eq("id", foto.id);
+
+  if (erroRegistro) {
+    avisar("Arquivo excluído, mas houve erro ao atualizar a galeria: " + erroRegistro.message);
+    return;
+  }
+
+  avisar("Foto excluída!");
+  carregarFotos();
+}
+
+async function iniciar() {
+  if (await verificarAdmin()) {
+    carregarAgendamentos();
+    carregarFotos();
+  }
+}
+
+iniciar();
 </script>
-
 </body>
   </html>
   
