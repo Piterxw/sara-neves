@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -9,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -20,359 +18,80 @@
   --gold:#b69a78;
   --text:#46382f;
 }
-
-* {box-sizing:border-box;margin:0;padding:0}
-html {scroll-behavior:smooth}
-
-body {
-  background:var(--cream);
-  color:var(--text);
-  font-family:'DM Sans',sans-serif;
-}
-
-header {
-  min-height:82px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px 8%;
-  background:rgba(248,245,240,.97);
-  border-bottom:1px solid var(--beige);
-}
-
-.logo {
-  font-family:'Playfair Display',serif;
-  font-size:25px;
-  letter-spacing:2px;
-}
-
-.logo small {
-  display:block;
-  text-align:center;
-  font-family:'DM Sans',sans-serif;
-  font-size:9px;
-  letter-spacing:5px;
-  margin-top:3px;
-}
-
-nav {
-  display:flex;
-  gap:18px;
-  flex-wrap:wrap;
-}
-
-nav a {
-  color:var(--brown);
-  text-decoration:none;
-  font-size:11px;
-  letter-spacing:1px;
-}
-
-nav a:hover {color:var(--gold)}
-
-.hero {
-  min-height:620px;
-  display:flex;
-  align-items:center;
-  padding:70px 9%;
-  background:
-    linear-gradient(90deg,rgba(42,31,24,.68),rgba(42,31,24,.12)),
-    url('https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=1800&q=85')
-    center 38%/cover;
-  color:white;
-}
-
-.hero-content {max-width:520px}
-
-.eyebrow {
-  font-size:11px;
-  letter-spacing:4px;
-  margin-bottom:24px;
-}
-
-.hero h1 {
-  font-family:'Playfair Display',serif;
-  font-size:clamp(45px,7vw,76px);
-  font-weight:400;
-  line-height:1.08;
-  margin-bottom:24px;
-}
-
-.hero p {
-  font-size:15px;
-  line-height:1.8;
-  max-width:390px;
-  color:#f2e9df;
-}
-
-.button {
-  display:inline-block;
-  margin-top:32px;
-  padding:17px 30px;
-  background:#e8d8c4;
-  color:#49372d;
-  text-decoration:none;
-  font-size:11px;
-  letter-spacing:2px;
-  text-transform:uppercase;
-}
-
-.intro {
-  padding:100px 20px 75px;
-  text-align:center;
-}
-
-.kicker {
-  color:var(--gold);
-  text-transform:uppercase;
-  letter-spacing:4px;
-  font-size:10px;
-  margin-bottom:18px;
-}
-
-h2 {
-  font-family:'Playfair Display',serif;
-  font-size:clamp(32px,5vw,48px);
-  font-weight:400;
-}
-
-.intro p {
-  max-width:520px;
-  margin:20px auto 0;
-  line-height:1.9;
-  font-size:14px;
-  color:#806f61;
-}
-
-.services {padding:35px 8% 100px}
-
-.service-grid {
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:22px;
-  max-width:1100px;
-  margin:45px auto 0;
-}
-
-.service-card {
-  background:#fffdfa;
-  border:1px solid var(--beige);
-  padding:38px 25px;
-  text-align:center;
-}
-
-.service-number {
-  color:var(--gold);
-  font-family:'Playfair Display',serif;
-  font-size:28px;
-}
-
-.service-card h3 {
-  font-family:'Playfair Display',serif;
-  font-size:23px;
-  font-weight:400;
-  margin:18px 0 12px;
-}
-
-.service-card p {
-  color:#8c7b6e;
-  font-size:13px;
-  line-height:1.7;
-}
-
-.service-price {
-  margin-top:18px;
-  color:var(--brown);
-  font-size:17px;
-  font-weight:600;
-}
-
-/* GALERIA */
-.gallery {
-  padding:90px 8%;
-  text-align:center;
-  background:#fffdfa;
-}
-
-.gallery-intro {
-  max-width:520px;
-  margin:18px auto 35px;
-  color:#806f61;
-  font-size:14px;
-  line-height:1.8;
-}
-
-.gallery-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-  gap:22px;
-  max-width:1100px;
-  margin:40px auto 0;
-}
-
-.gallery-card {
-  background:var(--cream);
-  border:1px solid var(--beige);
-  overflow:hidden;
-  text-align:left;
-}
-
-.gallery-card img {
-  display:block;
-  width:100%;
-  height:280px;
-  object-fit:cover;
-  background:var(--beige);
-}
-
-.gallery-card p {
-  padding:16px;
-  color:var(--brown);
-  font-size:13px;
-  line-height:1.7;
-}
-
-.gallery-empty {
-  grid-column:1/-1;
-  color:#806f61;
-  padding:25px;
-  font-size:14px;
-}
-
-.booking {
-  background:var(--beige);
-  padding:95px 20px;
-}
-
-.booking-wrap {
-  max-width:650px;
-  margin:auto;
-  text-align:center;
-}
-
-.booking-wrap>p {
-  margin:15px auto 35px;
-  color:#78675b;
-  line-height:1.7;
-  font-size:14px;
-}
-
-form {
-  background:#fffdfa;
-  padding:35px;
-  text-align:left;
-  box-shadow:0 12px 35px #5944370d;
-}
-
-label {
-  display:block;
-  margin:17px 0 8px;
-  font-size:12px;
-  letter-spacing:1px;
-}
-
-input,select {
-  width:100%;
-  padding:15px;
-  border:1px solid #e5d9cc;
-  background:white;
-  color:var(--text);
-  font-family:inherit;
-  font-size:14px;
-  outline:none;
-}
-
-input:focus,select:focus {border-color:var(--gold)}
-
-.submit {
-  width:100%;
-  margin-top:28px;
-  padding:18px;
-  background:var(--brown);
-  color:white;
-  border:none;
-  font-family:inherit;
-  letter-spacing:2px;
-  font-size:11px;
-  cursor:pointer;
-  text-transform:uppercase;
-}
-
-.submit:disabled {opacity:.6;cursor:not-allowed}
-
-.notice {
-  margin-top:18px;
-  color:#88786c;
-  font-size:11px;
-  line-height:1.7;
-}
-
-#precoSelecionado {
-  margin-top:12px;
-  color:var(--brown);
-  font-size:14px;
-  font-weight:600;
-}
-
-#mensagem {
-  margin-top:18px;
-  font-size:13px;
-  text-align:center;
-  line-height:1.6;
-}
-
-.contact {
-  text-align:center;
-  padding:85px 20px;
-}
-
-.contact p {
-  margin-top:15px;
-  color:#806f61;
-  font-size:14px;
-}
-
-footer {
-  padding:35px 20px;
-  background:#49382e;
-  color:#eee3d7;
-  text-align:center;
-}
-
-footer .logo {font-size:23px}
-footer p {margin-top:12px;font-size:11px;letter-spacing:1px}
-
-.admin-link {
-  display:inline-block;
-  margin-top:15px;
-  color:#eee3d7;
-  font-size:11px;
-  text-decoration:underline;
-}
-
-@media(max-width:700px) {
-  header {padding:12px 5%;gap:12px;flex-wrap:wrap}
-  nav {gap:12px}
-  nav a {font-size:10px}
-  .hero {min-height:550px;padding:55px 8%;background-position:58% center}
-  .service-grid {grid-template-columns:1fr}
-  .services {padding-left:7%;padding-right:7%}
-  .gallery {padding:65px 7%}
-  .gallery-grid {grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-  .gallery-card img {height:190px}
-  form {padding:24px 19px}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--text);font-family:'DM Sans',sans-serif}
+header{min-height:82px;display:flex;justify-content:space-between;align-items:center;padding:12px 8%;background:rgba(248,245,240,.97);border-bottom:1px solid var(--beige)}
+.logo{font-family:'Playfair Display',serif;font-size:25px;letter-spacing:2px}
+.logo small{display:block;text-align:center;font-family:'DM Sans',sans-serif;font-size:9px;letter-spacing:5px;margin-top:3px}
+nav{display:flex;gap:18px;flex-wrap:wrap}
+nav a{color:var(--brown);text-decoration:none;font-size:11px;letter-spacing:1px}
+nav a:hover{color:var(--gold)}
+.hero{min-height:620px;display:flex;align-items:center;padding:70px 9%;background:linear-gradient(90deg,rgba(42,31,24,.68),rgba(42,31,24,.12)),url('https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=1800&q=85') center 38%/cover;color:white}
+.hero-content{max-width:520px}
+.eyebrow{font-size:11px;letter-spacing:4px;margin-bottom:24px}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(45px,7vw,76px);font-weight:400;line-height:1.08;margin-bottom:24px}
+.hero p{font-size:15px;line-height:1.8;max-width:390px;color:#f2e9df}
+.button{display:inline-block;margin-top:32px;padding:17px 30px;background:#e8d8c4;color:#49372d;text-decoration:none;font-size:11px;letter-spacing:2px;text-transform:uppercase}
+.intro{padding:100px 20px 75px;text-align:center}
+.kicker{color:var(--gold);text-transform:uppercase;letter-spacing:4px;font-size:10px;margin-bottom:18px}
+h2{font-family:'Playfair Display',serif;font-size:clamp(32px,5vw,48px);font-weight:400}
+.intro p{max-width:520px;margin:20px auto 0;line-height:1.9;font-size:14px;color:#806f61}
+.services{padding:35px 8% 100px}
+.service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;max-width:1100px;margin:45px auto 0}
+.service-card{background:#fffdfa;border:1px solid var(--beige);padding:38px 25px;text-align:center}
+.service-number{color:var(--gold);font-family:'Playfair Display',serif;font-size:28px}
+.service-card h3{font-family:'Playfair Display',serif;font-size:23px;font-weight:400;margin:18px 0 12px}
+.service-card p{color:#8c7b6e;font-size:13px;line-height:1.7}
+.service-price{margin-top:18px;color:var(--brown);font-size:17px;font-weight:600}
+.gallery{padding:90px 8%;text-align:center;background:#fffdfa}
+.gallery-intro{max-width:520px;margin:18px auto 35px;color:#806f61;font-size:14px;line-height:1.8}
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:22px;max-width:1100px;margin:40px auto 0}
+.gallery-card{background:var(--cream);border:1px solid var(--beige);overflow:hidden;text-align:left}
+.gallery-card img{display:block;width:100%;height:280px;object-fit:cover;background:var(--beige)}
+.gallery-card p{padding:16px;color:var(--brown);font-size:13px;line-height:1.7}
+.gallery-empty{grid-column:1/-1;color:#806f61;padding:25px;font-size:14px}
+.booking{background:var(--beige);padding:95px 20px}
+.booking-wrap{max-width:650px;margin:auto;text-align:center}
+.booking-wrap>p{margin:15px auto 35px;color:#78675b;line-height:1.7;font-size:14px}
+form{background:#fffdfa;padding:35px;text-align:left;box-shadow:0 12px 35px #5944370d}
+label{display:block;margin:17px 0 8px;font-size:12px;letter-spacing:1px}
+input,select{width:100%;padding:15px;border:1px solid #e5d9cc;background:white;color:var(--text);font-family:inherit;font-size:14px;outline:none}
+input:focus,select:focus{border-color:var(--gold)}
+.submit{width:100%;margin-top:28px;padding:18px;background:var(--brown);color:white;border:none;font-family:inherit;letter-spacing:2px;font-size:11px;cursor:pointer;text-transform:uppercase}
+.submit:disabled{opacity:.6;cursor:not-allowed}
+.notice{margin-top:18px;color:#88786c;font-size:11px;line-height:1.7}
+#precoSelecionado{margin-top:12px;color:var(--brown);font-size:14px;font-weight:600}
+#mensagem{margin-top:18px;font-size:13px;text-align:center;line-height:1.6}
+.pix-box{display:none;margin-top:22px;padding:22px;background:#f8f5f0;border:1px solid var(--beige);text-align:center}
+.pix-box h3{font-family:'Playfair Display',serif;font-size:24px;font-weight:400;margin-bottom:12px}
+.pix-key{font-weight:600;font-size:17px;overflow-wrap:anywhere;margin:12px 0;color:var(--brown)}
+.pix-button{width:100%;padding:15px;border:0;background:var(--gold);color:white;font-family:inherit;font-size:12px;letter-spacing:1px;cursor:pointer;margin-top:10px}
+.pix-help{font-size:12px;line-height:1.7;color:#806f61;margin-top:12px}
+.contact{text-align:center;padding:85px 20px}
+.contact p{margin-top:15px;color:#806f61;font-size:14px}
+footer{padding:35px 20px;background:#49382e;color:#eee3d7;text-align:center}
+footer .logo{font-size:23px}
+footer p{margin-top:12px;font-size:11px;letter-spacing:1px}
+.admin-link{display:inline-block;margin-top:15px;color:#eee3d7;font-size:11px;text-decoration:underline}
+@media(max-width:700px){
+ header{padding:12px 5%;gap:12px;flex-wrap:wrap}
+ nav{gap:12px}
+ nav a{font-size:10px}
+ .hero{min-height:550px;padding:55px 8%;background-position:58% center}
+ .service-grid{grid-template-columns:1fr}
+ .services{padding-left:7%;padding-right:7%}
+ .gallery{padding:65px 7%}
+ .gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ .gallery-card img{height:190px}
+ form{padding:24px 19px}
 }
 </style>
 </head>
 
 <body>
-
 <header>
-  <div class="logo">
-    SARA NEVES
-    <small>BROW STUDIO</small>
-  </div>
-
+  <div class="logo">SARA NEVES<small>BROW STUDIO</small></div>
   <nav>
     <a href="#servicos">SERVIÇOS</a>
     <a href="#galeria">GALERIA</a>
@@ -401,7 +120,6 @@ footer p {margin-top:12px;font-size:11px;letter-spacing:1px}
     <div class="kicker">NOSSOS CUIDADOS</div>
     <h2>Serviços</h2>
   </div>
-
   <div id="cardsServicos" class="service-grid">
     <p class="gallery-empty">Carregando serviços...</p>
   </div>
@@ -410,10 +128,7 @@ footer p {margin-top:12px;font-size:11px;letter-spacing:1px}
 <section class="gallery" id="galeria">
   <div class="kicker">NOSSO TRABALHO</div>
   <h2>Galeria de beleza</h2>
-  <p class="gallery-intro">
-    Alguns resultados dos nossos cuidados, feitos com carinho e delicadeza.
-  </p>
-
+  <p class="gallery-intro">Alguns resultados dos nossos cuidados, feitos com carinho e delicadeza.</p>
   <div id="galeriaFotos" class="gallery-grid">
     <p class="gallery-empty">Carregando fotos...</p>
   </div>
@@ -453,8 +168,21 @@ footer p {margin-top:12px;font-size:11px;letter-spacing:1px}
         O envio representa uma solicitação, não uma confirmação automática.
         Aguarde o retorno pelo WhatsApp.
       </p>
-
       <p id="mensagem" role="status"></p>
+
+      <div class="pix-box" id="pixBox">
+        <h3>Pagamento via Pix</h3>
+        <p>Valor do serviço:</p>
+        <div class="pix-key" id="pixValor"></div>
+        <p>Chave Pix da Sara:</p>
+        <div class="pix-key" id="pixChave">+55 28 99911-5294</div>
+        <button class="pix-button" type="button" id="copiarPix">COPIAR CHAVE PIX</button>
+        <p class="pix-help">
+          Após realizar o Pix, envie o comprovante pelo WhatsApp.
+          O agendamento só será confirmado depois que a responsável verificar o pagamento e confirmar o horário.
+        </p>
+        <a class="button" id="enviarComprovante" href="https://wa.me/5528999115294" target="_blank" rel="noopener">Enviar comprovante pelo WhatsApp</a>
+      </div>
     </form>
   </div>
 </section>
@@ -476,19 +204,19 @@ footer p {margin-top:12px;font-size:11px;letter-spacing:1px}
 <script>
 const SUPABASE_URL = "https://upgthlpcnnskasemvzso.supabase.co";
 const SUPABASE_KEY = "sb_publishable_o9oit1hipzi18_UjCpXWwg_WsRuG67p";
-
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* SISTEMA DE SONS */
+const CHAVE_PIX = "+5528999115294";
+const WHATSAPP_SARA = "5528999115294";
+
+/* SONS */
 let contextoAudio = null;
 
 function tocarSom(tipo = "toque") {
   try {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) return;
-
     if (!contextoAudio) contextoAudio = new AudioContextClass();
-
     if (contextoAudio.state === "suspended") contextoAudio.resume();
 
     const agora = contextoAudio.currentTime;
@@ -496,17 +224,13 @@ function tocarSom(tipo = "toque") {
     function nota(frequencia, inicio, duracao, volumeMaximo) {
       const oscilador = contextoAudio.createOscillator();
       const volume = contextoAudio.createGain();
-
       oscilador.type = "sine";
       oscilador.frequency.setValueAtTime(frequencia, agora + inicio);
-
       volume.gain.setValueAtTime(0.0001, agora + inicio);
       volume.gain.exponentialRampToValueAtTime(volumeMaximo, agora + inicio + 0.02);
       volume.gain.exponentialRampToValueAtTime(0.0001, agora + inicio + duracao);
-
       oscilador.connect(volume);
       volume.connect(contextoAudio.destination);
-
       oscilador.start(agora + inicio);
       oscilador.stop(agora + inicio + duracao + 0.03);
     }
@@ -527,7 +251,6 @@ document.addEventListener("click", event => {
   if (elemento && !elemento.disabled) tocarSom("toque");
 });
 
-/* FORMATAÇÃO DE PREÇOS */
 function formatarMoeda(valor) {
   return Number(valor).toLocaleString("pt-BR", {
     style: "currency",
@@ -535,7 +258,7 @@ function formatarMoeda(valor) {
   });
 }
 
-/* SERVIÇOS E PREÇOS DO PAINEL ADM */
+/* SERVIÇOS */
 let servicosAtivos = [];
 
 async function carregarServicosPublicos() {
@@ -563,12 +286,10 @@ async function carregarServicosPublicos() {
 
     if (!servicosAtivos.length) {
       seletor.innerHTML = '<option value="">Serviços indisponíveis</option>';
-
       const aviso = document.createElement("p");
       aviso.className = "gallery-empty";
       aviso.textContent = "Os serviços estarão disponíveis assim que seus preços forem cadastrados no painel administrativo.";
       cards.appendChild(aviso);
-
       precoSelecionado.textContent = "Consulte os valores pelo WhatsApp.";
       return;
     }
@@ -599,17 +320,13 @@ async function carregarServicosPublicos() {
       card.append(numero, titulo, descricao, preco);
       cards.appendChild(card);
     });
-
   } catch (error) {
     console.error("Erro ao carregar serviços:", error);
-
     seletor.innerHTML = '<option value="">Erro ao carregar serviços</option>';
-
     const aviso = document.createElement("p");
     aviso.className = "gallery-empty";
     aviso.textContent = "Não foi possível carregar os serviços. Tente novamente mais tarde.";
     cards.appendChild(aviso);
-
     precoSelecionado.textContent = "Não foi possível consultar os preços.";
   }
 }
@@ -617,7 +334,6 @@ async function carregarServicosPublicos() {
 document.getElementById("servico").addEventListener("change", () => {
   const id = document.getElementById("servico").value;
   const item = servicosAtivos.find(servico => servico.id === id);
-
   document.getElementById("precoSelecionado").textContent = item
     ? `Valor do serviço: ${formatarMoeda(item.price)}`
     : "Selecione um serviço para ver o preço.";
@@ -667,12 +383,13 @@ async function carregarGaleria() {
   });
 }
 
-/* AGENDAMENTOS */
+/* HORÁRIOS */
 const form = document.getElementById("formAgendamento");
 const mensagem = document.getElementById("mensagem");
 const botao = document.getElementById("botaoEnviar");
 const campoData = document.getElementById("data");
 const campoHorario = document.getElementById("horario");
+const pixBox = document.getElementById("pixBox");
 
 const DURACAO = 40;
 let horariosDisponiveis = [];
@@ -713,7 +430,6 @@ function gerarHorarios() {
 
 async function carregarHorarios() {
   const data = campoData.value;
-
   campoHorario.innerHTML = '<option value="">Carregando horários...</option>';
   campoHorario.disabled = true;
   horariosDisponiveis = [];
@@ -735,7 +451,6 @@ async function carregarHorarios() {
       "horarios_ocupados",
       { p_data: data }
     );
-
     if (error) throw error;
 
     const agora = new Date();
@@ -773,7 +488,6 @@ async function carregarHorarios() {
     });
 
     campoHorario.disabled = false;
-
   } catch (error) {
     console.error(error);
     campoHorario.innerHTML = '<option value="">Erro ao carregar horários</option>';
@@ -783,24 +497,10 @@ async function carregarHorarios() {
 
 campoData.addEventListener("change", carregarHorarios);
 
+/* AGENDAMENTO */
 form.addEventListener("submit", async event => {
   event.preventDefault();
+  pixBox.style.display = "none";
 
   const nome = document.getElementById("nome").value.trim();
-  const telefone = document.getElementById("telefone").value.trim();
-
-  const servicoId = document.getElementById("servico").value;
-  const servicoSelecionado = servicosAtivos.find(item => item.id === servicoId);
-
-  const data = campoData.value;
-  const horario = campoHorario.value;
-
-  if (!nome || !telefone || !servicoSelecionado || !data || !horario) {
-    mensagem.textContent = "Preencha todos os campos e escolha um horário e serviço válido.";
-    return;
-  }
-
-  const servico = servicoSelecionado.name;
-  const precoServico = Number(servicoSelecionado.price);
-
-  if (!Number.isFinite(pre
+  const telefone = d
