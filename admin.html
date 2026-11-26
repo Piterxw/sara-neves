@@ -12,17 +12,19 @@
 body{margin:0;background:#f8f4ef;color:#49382f;font-family:'DM Sans',sans-serif}
 header{background:#49382f;color:white;padding:24px;text-align:center}
 h1{font-family:'Playfair Display',serif;font-weight:500;margin:0}
-main{max-width:950px;margin:30px auto;padding:0 16px}
+main{max-width:1050px;margin:30px auto;padding:0 16px}
 .card{background:white;padding:22px;border-radius:14px;margin-bottom:20px;box-shadow:0 4px 20px #49382f12}
 input,select,button{font:inherit;padding:12px;border-radius:8px;border:1px solid #ddd;width:100%;margin:6px 0}
 button{background:#80634f;color:white;border:0;font-weight:600;cursor:pointer}
-button:disabled{opacity:.5}
+button:disabled{opacity:.5;cursor:not-allowed}
 .tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
-.tabs button{flex:1;min-width:100px;font-size:13px}
+.tabs button{flex:1;min-width:110px;font-size:13px}
 .secondary{background:#e9dfd5;color:#49382f}
 .danger{background:#a34e45}
+.success{background:#58765a}
 .hidden{display:none!important}
-.item{border-bottom:1px solid #eee;padding:14px 0}
+.item{border-bottom:1px solid #eee;padding:16px 0}
+.item p{margin:7px 0}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
 .photo{border:1px solid #eee;border-radius:10px;overflow:hidden}
 .photo img{width:100%;height:150px;object-fit:cover;display:block}
@@ -30,11 +32,10 @@ button:disabled{opacity:.5}
 .photo button{margin:0;border-radius:0}
 #mensagem,#erroLogin{padding:10px 0;font-size:14px}
 .status{font-size:13px;color:#80634f}
+.acoes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:12px}
+.acoes button{margin:0}
 .servico{border:1px solid #eadfd5;padding:15px;border-radius:10px;margin:12px 0}
 .servico label{font-size:13px;font-weight:600}
-.servico .linha{display:flex;gap:10px;align-items:center}
-.servico .linha input{min-width:0}
-.servico .linha .preco{max-width:120px}
 .servico .ativo{display:flex;align-items:center;gap:8px;margin:8px 0}
 .servico .ativo input{width:auto;margin:0}
 .preco-texto{color:#80634f;font-size:13px}
@@ -45,12 +46,18 @@ button:disabled{opacity:.5}
 .avaliacao-adm h3{margin:0 0 8px}
 .avaliacao-estrelas{color:#b58b42;font-size:21px;letter-spacing:2px}
 .avaliacao-comentario{white-space:pre-wrap;overflow-wrap:anywhere}
-@media(max-width:480px){
-  .servico .linha{display:block}
-  .servico .linha .preco{max-width:none}
-  .card{padding:16px}
-  .tabela-historico th,.tabela-historico td{font-size:12px;padding:10px 4px}
-  .tabs button{min-width:calc(50% - 8px)}
+.resumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px}
+.resumo-card{background:#f8f4ef;border:1px solid #eadfd5;padding:18px;border-radius:12px}
+.resumo-card span{font-size:13px;color:#80634f}
+.resumo-card strong{display:block;font-size:23px;margin-top:8px}
+.etiqueta{display:inline-block;background:#eee5dc;color:#49382f;border-radius:20px;padding:5px 10px;font-size:12px}
+.etiqueta.pago{background:#e1eee1;color:#35613b}
+.etiqueta.pendente{background:#f6ead6;color:#805d26}
+@media(max-width:520px){
+ .card{padding:16px}
+ .tabs button{min-width:calc(50% - 8px)}
+ .acoes{grid-template-columns:1fr}
+ .tabela-historico th,.tabela-historico td{font-size:12px;padding:9px 4px}
 }
 </style>
 </head>
@@ -76,8 +83,9 @@ button:disabled{opacity:.5}
 <div class="tabs">
 <button id="abaAgendamentos">Agendamentos</button>
 <button id="abaHistorico" class="secondary">Histórico</button>
-<button id="abaGaleria" class="secondary">Galeria de fotos</button>
-<button id="abaServicos" class="secondary">Preços e Serviços</button>
+<button id="abaFinanceiro" class="secondary">Financeiro</button>
+<button id="abaGaleria" class="secondary">Galeria</button>
+<button id="abaServicos" class="secondary">Serviços</button>
 <button id="abaAvaliacoes" class="secondary">Avaliações</button>
 </div>
 
@@ -96,8 +104,16 @@ button:disabled{opacity:.5}
 
 <section id="areaHistorico" class="card hidden">
 <h2>Histórico</h2>
-<p>Agendamentos cancelados.</p>
+<p>Atendimentos concluídos e agendamentos cancelados.</p>
 <div id="listaHistorico">Carregando histórico...</div>
+</section>
+
+<section id="areaFinanceiro" class="card hidden">
+<h2>Financeiro</h2>
+<p>Acompanhe os pagamentos recebidos e os que ainda estão pendentes.</p>
+<div id="resumoFinanceiro" class="resumo"></div>
+<h3>Atendimentos</h3>
+<div id="listaFinanceiro">Carregando financeiro...</div>
 </section>
 
 <section id="areaGaleria" class="card hidden">
@@ -116,7 +132,7 @@ button:disabled{opacity:.5}
 
 <section id="areaServicos" class="card hidden">
 <h2>Preços e Serviços</h2>
-<p>Cadastre serviços e altere os valores que serão utilizados no site.</p>
+<p>Cadastre serviços e altere os valores utilizados no site.</p>
 <form id="formServico">
 <label for="novoNome"><strong>Nome do serviço</strong></label>
 <input id="novoNome" type="text" maxlength="100" placeholder="Ex.: Design de sobrancelhas" required>
@@ -126,7 +142,7 @@ button:disabled{opacity:.5}
 </form>
 <hr style="border:0;border-top:1px solid #eee;margin:22px 0">
 <h3>Serviços cadastrados</h3>
-<p class="preco-texto">Edite os campos e toque em salvar. Serviços desativados não ficam disponíveis para as clientes.</p>
+<p class="preco-texto">Serviços desativados não ficam disponíveis para as clientes.</p>
 <div id="listaServicos">Carregando serviços...</div>
 </section>
 
@@ -151,6 +167,19 @@ const mensagem = document.getElementById("mensagem");
 
 function avisar(texto) {
   mensagem.textContent = texto;
+}
+
+function dinheiro(valor) {
+  return Number(valor || 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  });
+}
+
+function formatarData(data) {
+  if (!data) return "";
+  const partes = data.split("-");
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
 
 function mostrarLogin() {
@@ -189,14 +218,20 @@ async function verificarAdmin() {
   return true;
 }
 
+/* LOGIN */
 document.getElementById("formLogin").addEventListener("submit", async (e) => {
   e.preventDefault();
+
   const email = document.getElementById("email").value.trim();
   const senha = document.getElementById("senha").value;
   const erro = document.getElementById("erroLogin");
+
   erro.textContent = "Entrando...";
 
-  const { error } = await db.auth.signInWithPassword({ email, password: senha });
+  const { error } = await db.auth.signInWithPassword({
+    email,
+    password: senha
+  });
 
   if (error) {
     erro.textContent = "Não foi possível entrar. Confira e-mail e senha.";
@@ -222,6 +257,7 @@ function mostrarAba(aba) {
   const areas = {
     agendamentos: "areaAgendamentos",
     historico: "areaHistorico",
+    financeiro: "areaFinanceiro",
     galeria: "areaGaleria",
     servicos: "areaServicos",
     avaliacoes: "areaAvaliacoes"
@@ -230,6 +266,7 @@ function mostrarAba(aba) {
   const botoes = {
     agendamentos: "abaAgendamentos",
     historico: "abaHistorico",
+    financeiro: "abaFinanceiro",
     galeria: "abaGaleria",
     servicos: "abaServicos",
     avaliacoes: "abaAvaliacoes"
@@ -242,6 +279,7 @@ function mostrarAba(aba) {
 
   if (aba === "agendamentos") carregarAgendamentos();
   if (aba === "historico") carregarHistorico();
+  if (aba === "financeiro") carregarFinanceiro();
   if (aba === "galeria") carregarFotos();
   if (aba === "servicos") carregarServicos();
   if (aba === "avaliacoes") carregarAvaliacoesPendentes();
@@ -249,17 +287,12 @@ function mostrarAba(aba) {
 
 document.getElementById("abaAgendamentos").addEventListener("click", () => mostrarAba("agendamentos"));
 document.getElementById("abaHistorico").addEventListener("click", () => mostrarAba("historico"));
+document.getElementById("abaFinanceiro").addEventListener("click", () => mostrarAba("financeiro"));
 document.getElementById("abaGaleria").addEventListener("click", () => mostrarAba("galeria"));
 document.getElementById("abaServicos").addEventListener("click", () => mostrarAba("servicos"));
 document.getElementById("abaAvaliacoes").addEventListener("click", () => mostrarAba("avaliacoes"));
 
-function formatarData(data) {
-  if (!data) return "";
-  const partes = data.split("-");
-  return `${partes[2]}/${partes[1]}/${partes[0]}`;
-}
-
-/* AGENDAMENTOS ATIVOS */
+/* AGENDAMENTOS */
 async function carregarAgendamentos() {
   const lista = document.getElementById("listaAgendamentos");
   lista.textContent = "Carregando agendamentos...";
@@ -267,12 +300,12 @@ async function carregarAgendamentos() {
   const { data, error } = await db
     .from("appointments")
     .select("*")
-    .neq("status", "cancelled")
+    .not("status", "in", '("cancelled","completed")')
     .order("appointment_date", { ascending: true })
     .order("appointment_time", { ascending: true });
 
   if (error) {
-    lista.textContent = "Erro ao carregar agendamentos.";
+    lista.textContent = "Erro ao carregar agendamentos: " + error.message;
     console.error(error);
     return;
   }
@@ -303,88 +336,86 @@ async function carregarAgendamentos() {
     const telefone = document.createElement("p");
     telefone.textContent = "Telefone: " + (item.customer_phone || "Não informado");
 
+    const preco = document.createElement("p");
+    preco.textContent = "Valor: " + dinheiro(item.service_price);
+
     const status = document.createElement("p");
     status.className = "status";
-    status.textContent = "Status: " + item.status;
+    status.textContent = "Situação: " + item.status;
 
-    div.append(titulo, detalhes, telefone, status);
+    const pagamento = document.createElement("span");
+    pagamento.className = "etiqueta " +
+      (item.payment_status === "paid" ? "pago" : "pendente");
+    pagamento.textContent =
+      item.payment_status === "paid" ? "Pagamento recebido" : "Pagamento pendente";
+
+    div.append(titulo, detalhes, telefone, preco, status, pagamento);
+
+    const acoes = document.createElement("div");
+    acoes.className = "acoes";
 
     if (item.status !== "confirmed") {
       const confirmar = document.createElement("button");
       confirmar.textContent = "Confirmar";
-      confirmar.addEventListener("click", () => alterarStatus(item.id, "confirmed"));
-
-      const cancelar = document.createElement("button");
-      cancelar.textContent = "Cancelar";
-      cancelar.className = "danger";
-      cancelar.addEventListener("click", () => {
-        if (confirm("Deseja cancelar este agendamento?")) {
-          alterarStatus(item.id, "cancelled");
-        }
-      });
-
-      div.append(confirmar, cancelar);
+      confirmar.addEventListener("click", () =>
+        alterarStatus(item.id, "confirmed")
+      );
+      acoes.appendChild(confirmar);
     }
 
+    if (item.status === "confirmed") {
+      const concluir = document.createElement("button");
+      concluir.textContent = "Concluir atendimento";
+      concluir.className = "success";
+      concluir.addEventListener("click", () => {
+        if (confirm("Marcar este atendimento como concluído?")) {
+          alterarStatus(item.id, "completed");
+        }
+      });
+      acoes.appendChild(concluir);
+    }
+
+    if (item.payment_status !== "paid") {
+      const pago = document.createElement("button");
+      pago.textContent = "Marcar como pago";
+      pago.className = "success";
+      pago.addEventListener("click", () => marcarPagamento(item.id, "paid"));
+      acoes.appendChild(pago);
+    } else {
+      const desfazer = document.createElement("button");
+      desfazer.textContent = "Desfazer pagamento";
+      desfazer.className = "secondary";
+      desfazer.addEventListener("click", () => {
+        if (confirm("Deseja desfazer o registro deste pagamento?")) {
+          marcarPagamento(item.id, "pending");
+        }
+      });
+      acoes.appendChild(desfazer);
+    }
+
+    const cancelar = document.createElement("button");
+    cancelar.textContent = "Cancelar";
+    cancelar.className = "danger";
+    cancelar.addEventListener("click", () => {
+      if (confirm("Deseja cancelar este agendamento?")) {
+        alterarStatus(item.id, "cancelled");
+      }
+    });
+    acoes.appendChild(cancelar);
+
+    const excluir = document.createElement("button");
+    excluir.textContent = "Excluir definitivamente";
+    excluir.className = "danger";
+    excluir.addEventListener("click", () => excluirAgendamento(item.id));
+    acoes.appendChild(excluir);
+
+    div.appendChild(acoes);
     lista.appendChild(div);
   });
 }
 
-/* HISTÓRICO DE CANCELAMENTOS */
-async function carregarHistorico() {
-  const lista = document.getElementById("listaHistorico");
-  lista.textContent = "Carregando histórico...";
+document.getElementById("filtro").addEventListener("change", carregarAgendamentos);
 
-  const { data, error } = await db
-    .from("appointments")
-    .select("id,customer_name,appointment_date,appointment_time")
-    .eq("status", "cancelled")
-    .order("appointment_date", { ascending: false })
-    .order("appointment_time", { ascending: true });
-
-  if (error) {
-    lista.textContent = "Erro ao carregar histórico.";
-    console.error(error);
-    return;
-  }
-
-  lista.replaceChildren();
-
-  if (!data || data.length === 0) {
-    lista.textContent = "Nenhum cancelamento registrado.";
-    return;
-  }
-
-  const tabela = document.createElement("table");
-  tabela.className = "tabela-historico";
-  const cabecalho = document.createElement("tr");
-
-  ["NOME", "DIA", "HORÁRIO"].forEach(texto => {
-    const th = document.createElement("th");
-    th.textContent = texto;
-    cabecalho.appendChild(th);
-  });
-
-  tabela.appendChild(cabecalho);
-
-  data.forEach(item => {
-    const linha = document.createElement("tr");
-    [
-      item.customer_name || "Cliente",
-      formatarData(item.appointment_date),
-      item.appointment_time || ""
-    ].forEach(texto => {
-      const td = document.createElement("td");
-      td.textContent = texto;
-      linha.appendChild(td);
-    });
-    tabela.appendChild(linha);
-  });
-
-  lista.appendChild(tabela);
-}
-
-/* ALTERAR STATUS DO AGENDAMENTO */
 async function alterarStatus(id, status) {
   avisar("Atualizando agendamento...");
 
@@ -394,19 +425,214 @@ async function alterarStatus(id, status) {
     .eq("id", id);
 
   if (error) {
-    avisar("Não foi possível atualizar o agendamento.");
+    avisar("Não foi possível atualizar: " + error.message);
     console.error(error);
     return;
   }
 
   avisar(status === "cancelled"
-    ? "Agendamento cancelado e enviado ao histórico!"
-    : "Agendamento atualizado!");
+    ? "Agendamento cancelado!"
+    : status === "completed"
+      ? "Atendimento concluído!"
+      : "Agendamento atualizado!");
 
   carregarAgendamentos();
+  carregarHistorico();
+  carregarFinanceiro();
 }
 
-document.getElementById("filtro").addEventListener("change", carregarAgendamentos);
+async function excluirAgendamento(id) {
+  if (!confirm("Excluir definitivamente este agendamento? Essa ação não pode ser desfeita.")) return;
+
+  avisar("Excluindo agendamento...");
+
+  const { error } = await db
+    .from("appointments")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    avisar("Erro ao excluir: " + error.message);
+    console.error(error);
+    return;
+  }
+
+  avisar("Agendamento excluído!");
+  carregarAgendamentos();
+  carregarHistorico();
+  carregarFinanceiro();
+}
+
+/* PAGAMENTOS */
+async function marcarPagamento(id, status) {
+  avisar("Atualizando pagamento...");
+
+  const atualizacao = status === "paid"
+    ? { payment_status: "paid", paid_at: new Date().toISOString() }
+    : { payment_status: "pending", paid_at: null };
+
+  const { error } = await db
+    .from("appointments")
+    .update(atualizacao)
+    .eq("id", id);
+
+  if (error) {
+    avisar("Erro ao atualizar pagamento: " + error.message);
+    console.error(error);
+    return;
+  }
+
+  avisar(status === "paid" ? "Pagamento registrado!" : "Pagamento desfeito.");
+  carregarAgendamentos();
+  carregarFinanceiro();
+}
+
+async function carregarFinanceiro() {
+  const resumo = document.getElementById("resumoFinanceiro");
+  const lista = document.getElementById("listaFinanceiro");
+
+  resumo.textContent = "Carregando...";
+  lista.textContent = "Carregando pagamentos...";
+
+  const { data, error } = await db
+    .from("appointments")
+    .select("id,customer_name,service,appointment_date,appointment_time,service_price,status,payment_status,paid_at")
+    .order("appointment_date", { ascending: false });
+
+  if (error) {
+    resumo.textContent = "Erro ao carregar financeiro.";
+    lista.textContent = error.message;
+    console.error(error);
+    return;
+  }
+
+  const registros = data || [];
+  const pagos = registros.filter(item => item.payment_status === "paid");
+  const pendentes = registros.filter(item => item.payment_status !== "paid");
+
+  const total = pagos.reduce((soma, item) =>
+    soma + Number(item.service_price || 0), 0
+  );
+
+  const totalPendente = pendentes.reduce((soma, item) =>
+    soma + Number(item.service_price || 0), 0
+  );
+
+  resumo.replaceChildren();
+
+  [
+    ["Total recebido", dinheiro(total)],
+    ["Pagamentos pendentes", dinheiro(totalPendente)],
+    ["Atendimentos pagos", String(pagos.length)]
+  ].forEach(([titulo, valor]) => {
+    const card = document.createElement("div");
+    card.className = "resumo-card";
+
+    const nome = document.createElement("span");
+    nome.textContent = titulo;
+
+    const numero = document.createElement("strong");
+    numero.textContent = valor;
+
+    card.append(nome, numero);
+    resumo.appendChild(card);
+  });
+
+  lista.replaceChildren();
+
+  if (!registros.length) {
+    lista.textContent = "Ainda não existem atendimentos registrados.";
+    return;
+  }
+
+  registros.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "item";
+
+    const nome = document.createElement("strong");
+    nome.textContent = item.customer_name || "Cliente";
+
+    const detalhes = document.createElement("p");
+    detalhes.textContent =
+      `${item.service || ""} | ${formatarData(item.appointment_date)} | ${item.appointment_time || ""}`;
+
+    const valor = document.createElement("p");
+    valor.textContent = "Valor: " + dinheiro(item.service_price);
+
+    const etiqueta = document.createElement("span");
+    etiqueta.className = "etiqueta " +
+      (item.payment_status === "paid" ? "pago" : "pendente");
+    etiqueta.textContent =
+      item.payment_status === "paid" ? "Pago" : "Pendente";
+
+    div.append(nome, detalhes, valor, etiqueta);
+
+    if (item.payment_status !== "paid") {
+      const botao = document.createElement("button");
+      botao.textContent = "Marcar como pago";
+      botao.className = "success";
+      botao.addEventListener("click", () => marcarPagamento(item.id, "paid"));
+      div.appendChild(botao);
+    }
+
+    lista.appendChild(div);
+  });
+}
+
+/* HISTÓRICO */
+async function carregarHistorico() {
+  const lista = document.getElementById("listaHistorico");
+  lista.textContent = "Carregando histórico...";
+
+  const { data, error } = await db
+    .from("appointments")
+    .select("id,customer_name,service,appointment_date,appointment_time,status,service_price")
+    .in("status", ["cancelled", "completed"])
+    .order("appointment_date", { ascending: false })
+    .order("appointment_time", { ascending: true });
+
+  if (error) {
+    lista.textContent = "Erro ao carregar histórico: " + error.message;
+    console.error(error);
+    return;
+  }
+
+  lista.replaceChildren();
+
+  if (!data || !data.length) {
+    lista.textContent = "Nenhum atendimento no histórico.";
+    return;
+  }
+
+  data.forEach(item => {: 
+    
+    const div = document.createElement("div");
+    div.className = "item";
+
+    const nome = document.createElement("strong");
+    nome.textContent = item.customer_name || "Cliente";
+
+    const detalhes = document.createElement("p");
+    detalhes.textContent =
+      `${item.service || ""} | ${formatarData(item.appointment_date)} | ${item.appointment_time || ""}`;
+
+    const valor = document.createElement("p");
+    valor.textContent = "Valor: " + dinheiro(item.service_price);
+
+    const status = document.createElement("span");
+    status.className = "etiqueta";
+    status.textContent =
+      item.status === "completed" ? "Concluído" : "Cancelado";
+
+    const excluir = document.createElement("button");
+    excluir.textContent = "Excluir do histórico";
+    excluir.className = "danger";
+    excluir.addEventListener("click", () => excluirAgendamento(item.id));
+
+    div.append(nome, detalhes, valor, status, excluir);
+    lista.appendChild(div);
+  });
+}
 
 /* GALERIA */
 document.getElementById("formFoto").addEventListener("submit", async (e) => {
@@ -494,7 +720,7 @@ async function carregarFotos() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    lista.textContent = "Erro ao carregar fotos.";
+    lista.textContent = "Erro ao carregar fotos: " + error.message;
     console.error(error);
     return;
   }
@@ -561,7 +787,7 @@ async function excluirFoto(foto) {
   carregarFotos();
 }
 
-/* PREÇOS E SERVIÇOS */
+/* SERVIÇOS */
 async function carregarServicos() {
   const lista = document.getElementById("listaServicos");
   lista.textContent = "Carregando serviços...";
@@ -579,7 +805,7 @@ async function carregarServicos() {
 
   lista.replaceChildren();
 
-  if (!data || data.length === 0) {
+  if (!data || !data.length) {
     lista.textContent = "Nenhum serviço cadastrado.";
     return;
   }
@@ -600,7 +826,6 @@ async function carregarServicos() {
     precoLabel.textContent = "Preço (R$)";
 
     const preco = document.createElement("input");
-    preco.className = "preco";
     preco.type = "number";
     preco.min = "0";
     preco.step = "0.01";
@@ -689,9 +914,7 @@ document.getElementById("formServico").addEventListener("submit", async (e) => {
   botao.disabled = false;
 
   if (error) {
-    avisar(error.code === "23505"
-      ? "Já existe um serviço com esse nome."
-      : "Erro ao adicionar: " + error.message);
+    avisar("Erro ao adicionar: " + error.message);
     return;
   }
 
@@ -700,7 +923,7 @@ document.getElementById("formServico").addEventListener("submit", async (e) => {
   carregarServicos();
 });
 
-/* AVALIAÇÕES: APROVAR OU REJEITAR */
+/* AVALIAÇÕES */
 async function carregarAvaliacoesPendentes() {
   const lista = document.getElementById("listaAvaliacoes");
   lista.textContent = "Carregando avaliações...";
@@ -719,7 +942,7 @@ async function carregarAvaliacoesPendentes() {
 
   lista.replaceChildren();
 
-  if (!data || data.length === 0) {
+  if (!data || !data.length) {
     lista.textContent = "Nenhuma avaliação aguardando aprovação.";
     return;
   }
@@ -738,7 +961,7 @@ async function carregarAvaliacoesPendentes() {
 
     const comentario = document.createElement("p");
     comentario.className = "avaliacao-comentario";
-    comentario.textContent = avaliacao.comment;
+    comentario.textContent = avaliacao.comment || "";
 
     const dataEnvio = document.createElement("p");
     dataEnvio.className = "status";
@@ -748,6 +971,7 @@ async function carregarAvaliacoesPendentes() {
 
     const aprovar = document.createElement("button");
     aprovar.textContent = "Aprovar avaliação";
+    aprovar.className = "success";
     aprovar.addEventListener("click", () =>
       alterarAvaliacao(avaliacao.id, "approved", aprovar)
     );
@@ -789,7 +1013,7 @@ async function alterarAvaliacao(id, status, botao) {
   carregarAvaliacoesPendentes();
 }
 
-/* VERIFICAR SESSÃO EXISTENTE */
+/* INICIALIZAÇÃO */
 (async function iniciarPainel() {
   const { data: { session } } = await db.auth.getSession();
 
@@ -800,7 +1024,6 @@ async function alterarAvaliacao(id, status, botao) {
     carregarAvaliacoesPendentes();
   }
 })();
-
 </script>
 </body>
 </html>
