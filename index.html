@@ -1,0 +1,463 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f8f4ef">
+<title>Sara Neves | Brow Studio</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root {
+  --bg:#f8f4ef;
+  --cream:#eee3d8;
+  --brown:#765744;
+  --dark:#453329;
+  --gold:#b99a7c;
+  --white:#fffdfa;
+}
+* {box-sizing:border-box;margin:0;padding:0}
+html {scroll-behavior:smooth}
+body {
+  background:var(--bg);
+  color:var(--dark);
+  font-family:'DM Sans',sans-serif;
+}
+a {text-decoration:none;color:inherit}
+button,input,select {font:inherit}
+header {
+  height:85px;padding:0 7%;
+  display:flex;align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid #e8ddd2;
+  background:var(--bg);
+}
+.logo {text-align:center}
+.logo h1 {
+  font:500 29px 'Playfair Display',serif;
+  letter-spacing:2px;
+}
+.logo span {
+  font-size:9px;letter-spacing:4px;color:var(--brown);
+}
+nav {display:flex;gap:28px;font-size:11px;letter-spacing:1px}
+nav a:hover {color:var(--gold)}
+.button {
+  display:inline-block;background:var(--dark);
+  color:white;padding:15px 25px;
+  border:0;cursor:pointer;font-size:11px;
+  letter-spacing:1px;transition:.3s;
+}
+.button:hover {background:var(--brown)}
+.hero {
+  display:grid;grid-template-columns:1fr 1fr;
+  min-height:570px;background:var(--cream);
+}
+.hero-text {
+  padding:70px 12%;
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:flex-start;
+}
+.eyebrow {
+  font-size:10px;letter-spacing:4px;
+  color:var(--brown);margin-bottom:25px;
+}
+.hero h2 {
+  font:400 clamp(43px,5vw,68px)/1.12 'Playfair Display',serif;
+  margin-bottom:24px;
+}
+.hero h2 em {color:var(--brown)}
+.hero p {
+  font-size:14px;line-height:1.9;
+  color:#79685a;max-width:390px;
+}
+.hero .button {margin-top:30px}
+.hero-photo {
+  background:
+  linear-gradient(#00000008,#00000008),
+  url('https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=1200&q=85')
+  center 35%/cover;
+  min-height:400px;
+}
+.intro {
+  max-width:760px;margin:auto;
+  padding:95px 25px;text-align:center;
+}
+.intro h2,.section-title {
+  font:400 42px 'Playfair Display',serif;
+}
+.intro p {
+  font-size:13px;line-height:2;
+  color:#897565;margin-top:20px;
+}
+.line {
+  height:1px;width:55px;
+  background:var(--gold);margin:24px auto;
+}
+.services {
+  background:#eee5dc;padding:85px 8%;
+}
+.heading {text-align:center;margin-bottom:45px}
+.heading small {
+  font-size:10px;letter-spacing:3px;
+  color:var(--brown);
+}
+.heading h2 {margin-top:15px}
+.grid {
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:18px;max-width:1100px;margin:auto;
+}
+.service {
+  background:var(--white);
+  padding:32px 26px;border:1px solid #e7dbcf;
+}
+.service-number {
+  font:30px 'Playfair Display',serif;color:#bda48e;
+}
+.service h3 {
+  font:23px 'Playfair Display',serif;
+  margin:20px 0 12px;
+}
+.service p {
+  font-size:12px;line-height:1.8;color:#89796d;
+}
+.service span {
+  display:block;margin-top:20px;
+  font-size:10px;letter-spacing:2px;color:var(--brown);
+}
+.booking {padding:90px 20px}
+.booking-inner {max-width:760px;margin:auto}
+.booking-subtitle {
+  text-align:center;color:#897565;
+  font-size:13px;margin:16px 0 38px;
+}
+.form-card {
+  background:white;padding:35px;
+  border:1px solid #e7dbcf;
+}
+.form-grid {
+  display:grid;grid-template-columns:1fr 1fr;gap:22px;
+}
+.field.full {grid-column:1/-1}
+label {
+  display:block;font-size:11px;
+  letter-spacing:.7px;margin-bottom:9px;
+}
+input,select {
+  width:100%;padding:15px;
+  border:1px solid #e6dacf;
+  background:#faf7f3;color:var(--dark);
+  outline:none;border-radius:0;
+}
+input:focus,select:focus {border-color:var(--gold)}
+.policy {
+  margin-top:25px;padding:18px;
+  background:#f3ece5;font-size:11px;
+  line-height:1.8;color:#725d4c;
+}
+.accept {
+  display:flex;gap:10px;
+  margin-top:18px;font-size:11px;line-height:1.6;
+}
+.accept input {width:auto;margin-top:2px}
+.form-card button {width:100%;margin-top:25px}
+#feedback {
+  margin-top:18px;font-size:13px;
+  line-height:1.6;text-align:center;
+}
+.contact {
+  background:#e7d8c9;padding:80px 20px;text-align:center;
+}
+.contact h2 {
+  font:400 40px 'Playfair Display',serif;
+}
+.contact p {margin:18px 0 25px;font-size:13px}
+footer {
+  background:var(--dark);color:#eee3d8;
+  text-align:center;padding:35px 20px;
+}
+footer h3 {font:25px 'Playfair Display',serif}
+footer p {
+  font-size:10px;letter-spacing:2px;
+  margin-top:12px;color:#c7b4a3;
+}
+@media(max-width:750px) {
+  header {padding:0 16px;height:75px}
+  nav {display:none}
+  .logo h1 {font-size:23px}
+  .hero {grid-template-columns:1fr}
+  .hero-text {padding:65px 27px}
+  .hero-photo {min-height:350px}
+  .grid {grid-template-columns:1fr}
+  .services {padding:70px 22px}
+  .intro {padding:75px 25px}
+  .intro h2,.section-title {font-size:34px}
+  .form-card {padding:23px 17px}
+  .form-grid {grid-template-columns:1fr}
+  .field.full {grid-column:auto}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">
+    <h1>Sara Neves</h1>
+    <span>BROW STUDIO</span>
+  </div>
+  <nav>
+    <a href="#inicio">INÍCIO</a>
+    <a href="#sobre">SOBRE</a>
+    <a href="#servicos">SERVIÇOS</a>
+    <a href="#agendamento">AGENDAR</a>
+  </nav>
+  <a href="#agendamento" class="button">AGENDAR</a>
+</header>
+
+<main>
+<section class="hero" id="inicio">
+  <div class="hero-text">
+    <span class="eyebrow">BELEZA EM CADA DETALHE</span>
+    <h2>Realce sua beleza com <em>naturalidade.</em></h2>
+    <p>
+      Cada olhar merece um cuidado especial.
+      Descubra a beleza de sobrancelhas desenhadas
+      para valorizar sua própria essência.
+    </p>
+    <a class="button" href="#agendamento">RESERVE SEU MOMENTO</a>
+  </div>
+  <div class="hero-photo" role="img" aria-label="Fotografia de beleza"></div>
+</section>
+
+<section class="intro" id="sobre">
+  <span class="eyebrow">SOBRE O STUDIO</span>
+  <h2>Seu olhar, nossa inspiração.</h2>
+  <div class="line"></div>
+  <p>
+    Mais do que um procedimento, um momento de cuidado.
+    Nosso propósito é valorizar sua beleza com delicadeza,
+    atenção aos detalhes e um atendimento especial.
+  </p>
+</section>
+
+<section class="services" id="servicos">
+  <div class="heading">
+    <small>NOSSOS PROCEDIMENTOS</small>
+    <h2 class="section-title">Escolha seu cuidado</h2>
+    <div class="line"></div>
+  </div>
+
+  <div class="grid">
+    <article class="service">
+      <span class="service-number">01</span>
+      <h3>Design de Sobrancelhas</h3>
+      <p>Desenho personalizado para valorizar o formato natural do olhar.</p>
+      <span>CONSULTE O VALOR</span>
+    </article>
+    <article class="service">
+      <span class="service-number">02</span>
+      <h3>Design com Henna</h3>
+      <p>Mais definição e preenchimento para um olhar marcante.</p>
+      <span>CONSULTE O VALOR</span>
+    </article>
+    <article class="service">
+      <span class="service-number">03</span>
+      <h3>Design com Tintura</h3>
+      <p>Realce dos fios com acabamento personalizado.</p>
+      <span>CONSULTE O VALOR</span>
+    </article>
+    <article class="service">
+      <span class="service-number">04</span>
+      <h3>Brow Lamination</h3>
+      <p>Alinhamento dos fios para um visual sofisticado.</p>
+      <span>CONSULTE O VALOR</span>
+    </article>
+  </div>
+</section>
+
+<section class="booking" id="agendamento">
+  <div class="booking-inner">
+    <div class="heading">
+      <small>AGENDE SEU MOMENTO</small>
+      <h2 class="section-title">Será um prazer receber você.</h2>
+    </div>
+    <p class="booking-subtitle">
+      Preencha os dados para solicitar seu horário.
+    </p>
+
+    <form class="form-card" id="bookingForm">
+      <div class="form-grid">
+        <div class="field">
+          <label for="nome">SEU NOME</label>
+          <input id="nome" required maxlength="100" placeholder="Nome completo">
+        </div>
+        <div class="field">
+          <label for="telefone">SEU WHATSAPP</label>
+          <input id="telefone" required type="tel" maxlength="20" placeholder="Seu telefone">
+        </div>
+        <div class="field full">
+          <label for="servico">PROCEDIMENTO DESEJADO</label>
+          <select id="servico" required>
+            <option value="">Selecione um procedimento</option>
+            <option>Design de Sobrancelhas</option>
+            <option>Design com Henna</option>
+            <option>Design com Tintura</option>
+            <option>Brow Lamination</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="data">DATA DESEJADA</label>
+          <input id="data" type="date" required>
+        </div>
+        <div class="field">
+          <label for="horario">HORÁRIO DESEJADO</label>
+          <input id="horario" type="time" required>
+        </div>
+      </div>
+
+      <div class="policy">
+        <strong>POLÍTICA DE CANCELAMENTO</strong><br>
+        Poderá ser aplicada uma taxa de cancelamento de 15%
+        sobre o valor do serviço, conforme as condições
+        previamente informadas e aceitas.
+      </div>
+
+      <label class="accept">
+        <input type="checkbox" id="aceite" required>
+        Li e concordo com as condições de cancelamento.
+      </label>
+
+      <button class="button" id="submitButton" type="submit">
+        SOLICITAR AGENDAMENTO
+      </button>
+      <p id="feedback" role="status"></p>
+    </form>
+  </div>
+</section>
+
+<section class="contact">
+  <span class="eyebrow">UM MOMENTO PARA VOCÊ</span>
+  <h2>Seu olhar merece esse cuidado.</h2>
+  <p>Entre em contato com nosso studio.</p>
+  <a class="button" href="https://wa.me/5528999115294" target="_blank" rel="noopener">
+    CONVERSAR PELO WHATSAPP
+  </a>
+</section>
+</main>
+
+<footer>
+  <h3>Sara Neves</h3>
+  <p>BROW STUDIO · BELEZA EM CADA DETALHE</p>
+  <p>© 2026 SARA NEVES</p>
+</footer>
+
+<script>
+// PREENCHER COM OS DADOS DO SEU PROJETO SUPABASE
+const SUPABASE_URL = "COLOQUE_A_URL_DO_SEU_PROJETO";
+const SUPABASE_KEY = "COLOQUE_SUA_CHAVE_PUBLICAVEL";
+
+const WHATSAPP = "5528999115294";
+
+const supabasePronto =
+  SUPABASE_URL.startsWith("https://") &&
+  SUPABASE_KEY !== "COLOQUE_SUA_CHAVE_PUBLICAVEL";
+
+let db = null;
+
+if (supabasePronto) {
+  db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+}
+
+const dataInput = document.getElementById("data");
+const hoje = new Date();
+const dataLocal = new Date(
+  hoje.getTime() - hoje.getTimezoneOffset() * 60000
+).toISOString().split("T")[0];
+
+dataInput.min = dataLocal;
+
+document.getElementById("bookingForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const button = document.getElementById("submitButton");
+  const feedback = document.getElementById("feedback");
+
+  const nome = document.getElementById("nome").value.trim();
+  const telefone = document.getElementById("telefone").value.trim();
+  const servico = document.getElementById("servico").value;
+  const data = dataInput.value;
+  const horario = document.getElementById("horario").value;
+  const aceite = document.getElementById("aceite").checked;
+
+  if (!aceite || data < dataLocal) {
+    feedback.textContent = "Confira a data e aceite a política.";
+    return;
+  }
+
+  if (!db) {
+    feedback.textContent =
+      "O sistema ainda não está conectado ao banco de dados.";
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "ENVIANDO...";
+  feedback.textContent = "";
+
+  try {
+    const { error } = await db
+      .from("appointments")
+      .insert({
+        customer_name: nome,
+        customer_phone: telefone,
+        service: servico,
+        appointment_date: data,
+        appointment_time: horario,
+        status: "pending"
+      });
+
+    if (error) throw error;
+
+    const mensagem =
+      "Olá, Sara! Solicitei um agendamento pelo site.\n\n" +
+      "Nome: " + nome + "\n" +
+      "WhatsApp: " + telefone + "\n" +
+      "Serviço: " + servico + "\n" +
+      "Data: " + data + "\n" +
+      "Horário desejado: " + horario + "\n\n" +
+      "Gostaria de receber as instruções de pagamento.";
+
+    feedback.textContent =
+      "Pedido registrado! Abrindo o WhatsApp para continuar.";
+
+    window.open(
+      "https://wa.me/" + WHATSAPP + "?text=" +
+      encodeURIComponent(mensagem),
+      "_blank"
+    );
+
+    e.target.reset();
+    dataInput.min = dataLocal;
+
+  } catch (error) {
+    console.error(error);
+    feedback.textContent =
+      "Não foi possível registrar o pedido. Tente novamente.";
+  } finally {
+    button.disabled = false;
+    button.textContent = "SOLICITAR AGENDAMENTO";
+  }
+});
+</script>
+
+</body>
+      </html>
+      
