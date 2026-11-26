@@ -180,6 +180,13 @@ h2 {
   line-height:1.7;
 }
 
+.service-price {
+  margin-top:18px;
+  color:var(--brown);
+  font-size:17px;
+  font-weight:600;
+}
+
 /* GALERIA */
 .gallery {
   padding:90px 8%;
@@ -300,6 +307,13 @@ input:focus,select:focus {border-color:var(--gold)}
   line-height:1.7;
 }
 
+#precoSelecionado {
+  margin-top:12px;
+  color:var(--brown);
+  font-size:14px;
+  font-weight:600;
+}
+
 #mensagem {
   margin-top:18px;
   font-size:13px;
@@ -388,24 +402,8 @@ footer p {margin-top:12px;font-size:11px;letter-spacing:1px}
     <h2>Serviços</h2>
   </div>
 
-  <div class="service-grid">
-    <article class="service-card">
-      <div class="service-number">01</div>
-      <h3>Design de sobrancelhas</h3>
-      <p>Um design pensado para valorizar seus traços naturais.</p>
-    </article>
-
-    <article class="service-card">
-      <div class="service-number">02</div>
-      <h3>Design com henna</h3>
-      <p>Mais definição e destaque para o olhar.</p>
-    </article>
-
-    <article class="service-card">
-      <div class="service-number">03</div>
-      <h3>Manutenção</h3>
-      <p>Cuidado e atenção para manter seu design.</p>
-    </article>
+  <div id="cardsServicos" class="service-grid">
+    <p class="gallery-empty">Carregando serviços...</p>
   </div>
 </section>
 
@@ -436,11 +434,9 @@ footer p {margin-top:12px;font-size:11px;letter-spacing:1px}
 
       <label for="servico">SERVIÇO DESEJADO</label>
       <select id="servico" required>
-        <option value="">Selecione um serviço</option>
-        <option value="Design de sobrancelhas">Design de sobrancelhas</option>
-        <option value="Design com henna">Design com henna</option>
-        <option value="Manutenção">Manutenção</option>
+        <option value="">Carregando serviços...</option>
       </select>
+      <p id="precoSelecionado">Selecione um serviço para ver o preço.</p>
 
       <label for="data">DATA DESEJADA</label>
       <input id="data" type="date" required>
@@ -491,13 +487,9 @@ function tocarSom(tipo = "toque") {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) return;
 
-    if (!contextoAudio) {
-      contextoAudio = new AudioContextClass();
-    }
+    if (!contextoAudio) contextoAudio = new AudioContextClass();
 
-    if (contextoAudio.state === "suspended") {
-      contextoAudio.resume();
-    }
+    if (contextoAudio.state === "suspended") contextoAudio.resume();
 
     const agora = contextoAudio.currentTime;
 
@@ -509,14 +501,8 @@ function tocarSom(tipo = "toque") {
       oscilador.frequency.setValueAtTime(frequencia, agora + inicio);
 
       volume.gain.setValueAtTime(0.0001, agora + inicio);
-      volume.gain.exponentialRampToValueAtTime(
-        volumeMaximo,
-        agora + inicio + 0.02
-      );
-      volume.gain.exponentialRampToValueAtTime(
-        0.0001,
-        agora + inicio + duracao
-      );
+      volume.gain.exponentialRampToValueAtTime(volumeMaximo, agora + inicio + 0.02);
+      volume.gain.exponentialRampToValueAtTime(0.0001, agora + inicio + duracao);
 
       oscilador.connect(volume);
       volume.connect(contextoAudio.destination);
@@ -536,16 +522,108 @@ function tocarSom(tipo = "toque") {
   }
 }
 
-/* SOM SUAVE AO CLICAR NOS BOTÕES */
 document.addEventListener("click", event => {
   const elemento = event.target.closest("button, .button");
-
-  if (elemento && !elemento.disabled) {
-    tocarSom("toque");
-  }
+  if (elemento && !elemento.disabled) tocarSom("toque");
 });
 
-/* GALERIA: CARREGAR FOTOS PUBLICADAS PELO ADMIN */
+/* FORMATAÇÃO DE PREÇOS */
+function formatarMoeda(valor) {
+  return Number(valor).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  });
+}
+
+/* SERVIÇOS E PREÇOS DO PAINEL ADM */
+let servicosAtivos = [];
+
+async function carregarServicosPublicos() {
+  const seletor = document.getElementById("servico");
+  const cards = document.getElementById("cardsServicos");
+  const precoSelecionado = document.getElementById("precoSelecionado");
+
+  seletor.innerHTML = '<option value="">Carregando serviços...</option>';
+  cards.replaceChildren();
+
+  try {
+    const { data, error } = await db
+      .from("services")
+      .select("id,name,price,active")
+      .eq("active", true)
+      .order("created_at", { ascending: true });
+
+    if (error) throw error;
+
+    servicosAtivos = (data || []).filter(item =>
+      Number.isFinite(Number(item.price)) && Number(item.price) > 0
+    );
+
+    seletor.innerHTML = '<option value="">Selecione um serviço</option>';
+
+    if (!servicosAtivos.length) {
+      seletor.innerHTML = '<option value="">Serviços indisponíveis</option>';
+
+      const aviso = document.createElement("p");
+      aviso.className = "gallery-empty";
+      aviso.textContent = "Os serviços estarão disponíveis assim que seus preços forem cadastrados no painel administrativo.";
+      cards.appendChild(aviso);
+
+      precoSelecionado.textContent = "Consulte os valores pelo WhatsApp.";
+      return;
+    }
+
+    servicosAtivos.forEach((item, index) => {
+      const option = document.createElement("option");
+      option.value = item.id;
+      option.textContent = `${item.name} — ${formatarMoeda(item.price)}`;
+      seletor.appendChild(option);
+
+      const card = document.createElement("article");
+      card.className = "service-card";
+
+      const numero = document.createElement("div");
+      numero.className = "service-number";
+      numero.textContent = String(index + 1).padStart(2, "0");
+
+      const titulo = document.createElement("h3");
+      titulo.textContent = item.name;
+
+      const descricao = document.createElement("p");
+      descricao.textContent = "Um cuidado especial para valorizar sua beleza natural.";
+
+      const preco = document.createElement("div");
+      preco.className = "service-price";
+      preco.textContent = formatarMoeda(item.price);
+
+      card.append(numero, titulo, descricao, preco);
+      cards.appendChild(card);
+    });
+
+  } catch (error) {
+    console.error("Erro ao carregar serviços:", error);
+
+    seletor.innerHTML = '<option value="">Erro ao carregar serviços</option>';
+
+    const aviso = document.createElement("p");
+    aviso.className = "gallery-empty";
+    aviso.textContent = "Não foi possível carregar os serviços. Tente novamente mais tarde.";
+    cards.appendChild(aviso);
+
+    precoSelecionado.textContent = "Não foi possível consultar os preços.";
+  }
+}
+
+document.getElementById("servico").addEventListener("change", () => {
+  const id = document.getElementById("servico").value;
+  const item = servicosAtivos.find(servico => servico.id === id);
+
+  document.getElementById("precoSelecionado").textContent = item
+    ? `Valor do serviço: ${formatarMoeda(item.price)}`
+    : "Selecione um serviço para ver o preço.";
+});
+
+/* GALERIA */
 async function carregarGaleria() {
   const galeria = document.getElementById("galeriaFotos");
   galeria.replaceChildren();
@@ -588,8 +666,6 @@ async function carregarGaleria() {
     galeria.appendChild(card);
   });
 }
-
-carregarGaleria();
 
 /* AGENDAMENTOS */
 const form = document.getElementById("formAgendamento");
@@ -712,96 +788,19 @@ form.addEventListener("submit", async event => {
 
   const nome = document.getElementById("nome").value.trim();
   const telefone = document.getElementById("telefone").value.trim();
-  const servico = document.getElementById("servico").value;
+
+  const servicoId = document.getElementById("servico").value;
+  const servicoSelecionado = servicosAtivos.find(item => item.id === servicoId);
+
   const data = campoData.value;
   const horario = campoHorario.value;
 
-  if (!nome || !telefone || !servico || !data || !horario) {
-    mensagem.textContent = "Preencha todos os campos e escolha um horário.";
+  if (!nome || !telefone || !servicoSelecionado || !data || !horario) {
+    mensagem.textContent = "Preencha todos os campos e escolha um horário e serviço válido.";
     return;
   }
 
-  if (!horariosDisponiveis.includes(horario)) {
-    mensagem.textContent = "Esse horário não está disponível. Escolha outro.";
-    await carregarHorarios();
-    return;
-  }
+  const servico = servicoSelecionado.name;
+  const precoServico = Number(servicoSelecionado.price);
 
-  botao.disabled = true;
-  botao.textContent = "ENVIANDO...";
-  mensagem.textContent = "";
-
-  try {
-    const { data: ocupados, error: erroConsulta } = await db.rpc(
-      "horarios_ocupados",
-      { p_data: data }
-    );
-
-    if (erroConsulta) throw erroConsulta;
-
-    const inicio = minutosDoHorario(horario);
-    const fim = inicio + DURACAO;
-
-    const conflito = (ocupados || []).some(item => {
-      const ocupadoInicio = minutosDoHorario(item.horario);
-      const ocupadoFim = ocupadoInicio + Number(item.duracao || DURACAO);
-      return inicio < ocupadoFim && fim > ocupadoInicio;
-    });
-
-    if (conflito) {
-      mensagem.textContent = "Esse horário acabou de ser reservado. Escolha outro.";
-      await carregarHorarios();
-      return;
-    }
-
-    const { error } = await db.from("appointments").insert([{
-      customer_name: nome,
-      customer_phone: telefone,
-      service: servico,
-      appointment_date: data,
-      appointment_time: horario,
-      status: "pending"
-    }]);
-
-    if (error) throw error;
-
-    mensagem.textContent = "Solicitação salva! Abrindo o WhatsApp...";
-
-    /* SOM DE CONFIRMAÇÃO */
-    tocarSom("confirmacao");
-
-    const texto = [
-      "Olá, Sara! Gostaria de solicitar um agendamento.",
-      "",
-      `Nome: ${nome}`,
-      `WhatsApp: ${telefone}`,
-      `Serviço: ${servico}`,
-      `Data: ${data}`,
-      `Horário: ${horario}`,
-      "",
-      "Aguardo a confirmação!"
-    ].join("\n");
-
-    window.open(
-      "https://wa.me/5528999115294?text=" + encodeURIComponent(texto),
-      "_blank"
-    );
-
-    form.reset();
-    campoHorario.innerHTML = '<option value="">Primeiro escolha a data</option>';
-    campoHorario.disabled = true;
-    horariosDisponiveis = [];
-
-  } catch (error) {
-    console.error(error);
-    mensagem.textContent = "Não foi possível enviar. Tente novamente.";
-  } finally {
-    botao.disabled = false;
-    botao.textContent = "SOLICITAR AGENDAMENTO";
-  }
-});
-</script>
-
-</body>
-  </html>
-  
+  if (!Number.isFinite(pre
