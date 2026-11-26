@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -42,11 +41,16 @@ button:disabled{opacity:.5}
 .tabela-historico{width:100%;border-collapse:collapse;text-align:left}
 .tabela-historico th,.tabela-historico td{padding:12px 6px;border-bottom:1px solid #eee}
 .tabela-historico th{font-size:12px;color:#80634f}
+.avaliacao-adm{border:1px solid #eadfd5;border-radius:10px;padding:15px;margin:14px 0}
+.avaliacao-adm h3{margin:0 0 8px}
+.avaliacao-estrelas{color:#b58b42;font-size:21px;letter-spacing:2px}
+.avaliacao-comentario{white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:480px){
   .servico .linha{display:block}
   .servico .linha .preco{max-width:none}
   .card{padding:16px}
   .tabela-historico th,.tabela-historico td{font-size:12px;padding:10px 4px}
+  .tabs button{min-width:calc(50% - 8px)}
 }
 </style>
 </head>
@@ -69,12 +73,12 @@ button:disabled{opacity:.5}
 </section>
 
 <section id="painel" class="hidden">
-
 <div class="tabs">
 <button id="abaAgendamentos">Agendamentos</button>
 <button id="abaHistorico" class="secondary">Histórico</button>
 <button id="abaGaleria" class="secondary">Galeria de fotos</button>
 <button id="abaServicos" class="secondary">Preços e Serviços</button>
+<button id="abaAvaliacoes" class="secondary">Avaliações</button>
 </div>
 
 <div id="mensagem" role="status"></div>
@@ -99,17 +103,13 @@ button:disabled{opacity:.5}
 <section id="areaGaleria" class="card hidden">
 <h2>Galeria de fotos</h2>
 <p>Publique fotos dos trabalhos para aparecerem no site.</p>
-
 <form id="formFoto">
 <label for="foto"><strong>Escolher foto</strong></label>
 <input id="foto" type="file" accept="image/*" required>
-
 <label for="legenda"><strong>Legenda da foto</strong></label>
 <input id="legenda" type="text" maxlength="180" placeholder="Ex.: Design de sobrancelhas">
-
 <button id="botaoEnviar" type="submit">Publicar foto</button>
 </form>
-
 <h3>Fotos publicadas</h3>
 <div id="listaFotos">Carregando...</div>
 </section>
@@ -117,23 +117,23 @@ button:disabled{opacity:.5}
 <section id="areaServicos" class="card hidden">
 <h2>Preços e Serviços</h2>
 <p>Cadastre serviços e altere os valores que serão utilizados no site.</p>
-
 <form id="formServico">
 <label for="novoNome"><strong>Nome do serviço</strong></label>
 <input id="novoNome" type="text" maxlength="100" placeholder="Ex.: Design de sobrancelhas" required>
-
 <label for="novoPreco"><strong>Preço em reais (R$)</strong></label>
 <input id="novoPreco" type="number" min="0" step="0.01" placeholder="Ex.: 25,00" required>
-
 <button id="botaoNovoServico" type="submit">Adicionar serviço</button>
 </form>
-
 <hr style="border:0;border-top:1px solid #eee;margin:22px 0">
-
 <h3>Serviços cadastrados</h3>
 <p class="preco-texto">Edite os campos e toque em salvar. Serviços desativados não ficam disponíveis para as clientes.</p>
-
 <div id="listaServicos">Carregando serviços...</div>
+</section>
+
+<section id="areaAvaliacoes" class="card hidden">
+<h2>Avaliações dos clientes</h2>
+<p>Aprove as avaliações para que apareçam no site.</p>
+<div id="listaAvaliacoes">Carregando avaliações...</div>
 </section>
 
 <button id="sair" class="danger">Sair do painel</button>
@@ -191,17 +191,12 @@ async function verificarAdmin() {
 
 document.getElementById("formLogin").addEventListener("submit", async (e) => {
   e.preventDefault();
-
   const email = document.getElementById("email").value.trim();
   const senha = document.getElementById("senha").value;
   const erro = document.getElementById("erroLogin");
-
   erro.textContent = "Entrando...";
 
-  const { error } = await db.auth.signInWithPassword({
-    email,
-    password: senha
-  });
+  const { error } = await db.auth.signInWithPassword({ email, password: senha });
 
   if (error) {
     erro.textContent = "Não foi possível entrar. Confira e-mail e senha.";
@@ -213,6 +208,7 @@ document.getElementById("formLogin").addEventListener("submit", async (e) => {
     carregarAgendamentos();
     carregarFotos();
     carregarServicos();
+    carregarAvaliacoesPendentes();
   }
 });
 
@@ -227,14 +223,16 @@ function mostrarAba(aba) {
     agendamentos: "areaAgendamentos",
     historico: "areaHistorico",
     galeria: "areaGaleria",
-    servicos: "areaServicos"
+    servicos: "areaServicos",
+    avaliacoes: "areaAvaliacoes"
   };
 
   const botoes = {
     agendamentos: "abaAgendamentos",
     historico: "abaHistorico",
     galeria: "abaGaleria",
-    servicos: "abaServicos"
+    servicos: "abaServicos",
+    avaliacoes: "abaAvaliacoes"
   };
 
   Object.keys(areas).forEach(nome => {
@@ -246,12 +244,14 @@ function mostrarAba(aba) {
   if (aba === "historico") carregarHistorico();
   if (aba === "galeria") carregarFotos();
   if (aba === "servicos") carregarServicos();
+  if (aba === "avaliacoes") carregarAvaliacoesPendentes();
 }
 
 document.getElementById("abaAgendamentos").addEventListener("click", () => mostrarAba("agendamentos"));
 document.getElementById("abaHistorico").addEventListener("click", () => mostrarAba("historico"));
 document.getElementById("abaGaleria").addEventListener("click", () => mostrarAba("galeria"));
 document.getElementById("abaServicos").addEventListener("click", () => mostrarAba("servicos"));
+document.getElementById("abaAvaliacoes").addEventListener("click", () => mostrarAba("avaliacoes"));
 
 function formatarData(data) {
   if (!data) return "";
@@ -312,9 +312,7 @@ async function carregarAgendamentos() {
     if (item.status !== "confirmed") {
       const confirmar = document.createElement("button");
       confirmar.textContent = "Confirmar";
-      confirmar.addEventListener("click", () =>
-        alterarStatus(item.id, "confirmed")
-      );
+      confirmar.addEventListener("click", () => alterarStatus(item.id, "confirmed"));
 
       const cancelar = document.createElement("button");
       cancelar.textContent = "Cancelar";
@@ -359,7 +357,6 @@ async function carregarHistorico() {
 
   const tabela = document.createElement("table");
   tabela.className = "tabela-historico";
-
   const cabecalho = document.createElement("tr");
 
   ["NOME", "DIA", "HORÁRIO"].forEach(texto => {
@@ -372,7 +369,6 @@ async function carregarHistorico() {
 
   data.forEach(item => {
     const linha = document.createElement("tr");
-
     [
       item.customer_name || "Cliente",
       formatarData(item.appointment_date),
@@ -382,14 +378,13 @@ async function carregarHistorico() {
       td.textContent = texto;
       linha.appendChild(td);
     });
-
     tabela.appendChild(linha);
   });
 
   lista.appendChild(tabela);
 }
 
-/* ALTERAR STATUS */
+/* ALTERAR STATUS DO AGENDAMENTO */
 async function alterarStatus(id, status) {
   avisar("Atualizando agendamento...");
 
@@ -411,7 +406,6 @@ async function alterarStatus(id, status) {
   carregarAgendamentos();
 }
 
-/* FILTRO */
 document.getElementById("filtro").addEventListener("change", carregarAgendamentos);
 
 /* GALERIA */
@@ -501,6 +495,7 @@ async function carregarFotos() {
 
   if (error) {
     lista.textContent = "Erro ao carregar fotos.";
+    console.error(error);
     return;
   }
 
@@ -578,6 +573,7 @@ async function carregarServicos() {
 
   if (error) {
     lista.textContent = "Erro ao carregar serviços: " + error.message;
+    console.error(error);
     return;
   }
 
@@ -619,7 +615,6 @@ async function carregarServicos() {
 
     const ativoTexto = document.createElement("span");
     ativoTexto.textContent = "Serviço ativo no site";
-
     ativoLinha.append(ativo, ativoTexto);
 
     const salvar = document.createElement("button");
@@ -652,11 +647,7 @@ async function salvarServico(id, nome, preco, ativo, botao) {
 
   const { error } = await db
     .from("services")
-    .update({
-      name: nome,
-      price: valor,
-      active: ativo
-    })
+    .update({ name: nome, price: valor, active: ativo })
     .eq("id", id);
 
   botao.disabled = false;
@@ -693,11 +684,7 @@ document.getElementById("formServico").addEventListener("submit", async (e) => {
 
   const { error } = await db
     .from("services")
-    .insert({
-      name: nome,
-      price: preco,
-      active: true
-    });
+    .insert({ name: nome, price: preco, active: true });
 
   botao.disabled = false;
 
@@ -705,7 +692,6 @@ document.getElementById("formServico").addEventListener("submit", async (e) => {
     avisar(error.code === "23505"
       ? "Já existe um serviço com esse nome."
       : "Erro ao adicionar: " + error.message);
-   
     return;
   }
 
@@ -713,6 +699,107 @@ document.getElementById("formServico").addEventListener("submit", async (e) => {
   document.getElementById("formServico").reset();
   carregarServicos();
 });
+
+/* AVALIAÇÕES: APROVAR OU REJEITAR */
+async function carregarAvaliacoesPendentes() {
+  const lista = document.getElementById("listaAvaliacoes");
+  lista.textContent = "Carregando avaliações...";
+
+  const { data, error } = await db
+    .from("reviews")
+    .select("id,customer_name,rating,comment,created_at")
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    lista.textContent = "Erro ao carregar avaliações: " + error.message;
+    console.error(error);
+    return;
+  }
+
+  lista.replaceChildren();
+
+  if (!data || data.length === 0) {
+    lista.textContent = "Nenhuma avaliação aguardando aprovação.";
+    return;
+  }
+
+  data.forEach(avaliacao => {
+    const card = document.createElement("article");
+    card.className = "avaliacao-adm";
+
+    const nome = document.createElement("h3");
+    nome.textContent = avaliacao.customer_name || "Cliente";
+
+    const estrelas = document.createElement("div");
+    estrelas.className = "avaliacao-estrelas";
+    estrelas.textContent =
+      "★".repeat(avaliacao.rating) + "☆".repeat(5 - avaliacao.rating);
+
+    const comentario = document.createElement("p");
+    comentario.className = "avaliacao-comentario";
+    comentario.textContent = avaliacao.comment;
+
+    const dataEnvio = document.createElement("p");
+    dataEnvio.className = "status";
+    dataEnvio.textContent = avaliacao.created_at
+      ? "Enviada em " + new Date(avaliacao.created_at).toLocaleString("pt-BR")
+      : "Aguardando aprovação";
+
+    const aprovar = document.createElement("button");
+    aprovar.textContent = "Aprovar avaliação";
+    aprovar.addEventListener("click", () =>
+      alterarAvaliacao(avaliacao.id, "approved", aprovar)
+    );
+
+    const rejeitar = document.createElement("button");
+    rejeitar.textContent = "Rejeitar avaliação";
+    rejeitar.className = "danger";
+    rejeitar.addEventListener("click", () => {
+      if (confirm("Deseja rejeitar esta avaliação?")) {
+        alterarAvaliacao(avaliacao.id, "rejected", rejeitar);
+      }
+    });
+
+    card.append(nome, estrelas, comentario, dataEnvio, aprovar, rejeitar);
+    lista.appendChild(card);
+  });
+}
+
+async function alterarAvaliacao(id, status, botao) {
+  if (botao) botao.disabled = true;
+  avisar("Atualizando avaliação...");
+
+  const { error } = await db
+    .from("reviews")
+    .update({ status })
+    .eq("id", id);
+
+  if (error) {
+    avisar("Erro ao atualizar avaliação: " + error.message);
+    console.error(error);
+    if (botao) botao.disabled = false;
+    return;
+  }
+
+  avisar(status === "approved"
+    ? "Avaliação aprovada e publicada no site!"
+    : "Avaliação rejeitada.");
+
+  carregarAvaliacoesPendentes();
+}
+
+/* VERIFICAR SESSÃO EXISTENTE */
+(async function iniciarPainel() {
+  const { data: { session } } = await db.auth.getSession();
+
+  if (session && await verificarAdmin()) {
+    carregarAgendamentos();
+    carregarFotos();
+    carregarServicos();
+    carregarAvaliacoesPendentes();
+  }
+})();
 
 </script>
 </body>
